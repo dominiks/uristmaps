@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" type="text/css">
+        <link rel="stylesheet" href="/assets/MarkerCluster.Default.css" type="text/css">
+        <link rel="stylesheet" href="/assets/MarkerCluster.css" type="text/css">
+        <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        .leaflet-container {
+            background: white;
+        }
+        .map {
+            height: 100vh;
+            width: 100%;
+        }
+        </style>
+        <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js" type="text/javascript"></script>
+        <script src="/assets/leaflet.markercluster.js" type="text/javascript"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.js" type="text/javascript"></script>
+        <script src="/assets/icons.js"></script>
+        
+        <title>Openlayers3 start</title>
+    </head>
+    <body>
+    <div id="map" class="map"></div>
+    <script type="text/javascript">
+
+        jQuery.getJSON("/assets/sites.json", function(data) {
+            var map = L.map('map').setView([0, 0], 3);
+        
+            L.tileLayer('/tiles/{z}/{x}/{y}.png', {
+                noWrap: true,
+                maxZoom: 7
+            }).addTo(map);
+            
+            var clusters = new L.MarkerClusterGroup();
+            var points = L.geoJson(null, {
+                pointToLayer: function (feature, latlng) {
+                    var marker = L.marker(latlng, {icon: get_icon(feature.properties.img)});
+                    if (feature.properties && feature.properties.popupContent) {
+                        marker.bindPopup(feature.properties.popupContent);
+                    }
+
+                    clusters.addLayer(marker);
+                    return clusters;
+                }
+            });
+            $.each(data.features, function(fid, feature) {
+                points.addData(feature);
+            });
+            map.addLayer(clusters);
+            var icon_layer = {"Sites": clusters};
+            L.control.layers({}, icon_layer).addTo(map);
+        });
+    </script>
+    </body>
+</html>
