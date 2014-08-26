@@ -11,9 +11,13 @@ from clint.textui import progress
 
 from PIL import Image
 
+from config import conf
+
 # Caches the surface objects created from png files so they are
 # only created once.
 SURFACE_CACHE = {}
+
+paths = conf["Paths"] # Reference to that conf section to make the lines a bit shorter. Unlinke this one which still gets really long.
 
 
 def get_surface(biome, size):
@@ -25,7 +29,7 @@ def get_surface(biome, size):
 
     if size == 1 or size == 2:
         biome = "arctic_ocean"
-    fname = "tiles/{}/{}.png".format(size, biome)
+    fname = "{}/{}/{}.png".format(paths["biome_tiles"], size, biome)
 
     if not os.path.exists(fname):
             print("File not found: {}".format(fname))
@@ -38,7 +42,7 @@ def get_surface(biome, size):
 
 def load_biomes_map():
     # Load heightmap json
-    with open("build/biomes.json","r") as biomejson:
+    with open("{}/biomes.json".format(paths["build"]),"r") as biomejson:
         biomes = json.loads(biomejson.read())
 
     print("Found biome info @{}".format(biomes["worldsize"]))
@@ -117,11 +121,11 @@ def render_tile(tile_x, tile_y, level, zoom_offset):
             ctx.paint()
             ctx.restore()
 
-    target_dir = "output/tiles/{}/{}/".format(level, tile_x)
+    target_dir = "{}/tiles/{}/{}/".format(paths["output"], level, tile_x)
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
-    fname = "output/tiles/{}/{}/{}.png".format(level, tile_x, tile_y)
+    fname = "{}/tiles/{}/{}/{}.png".format(paths["output"], level, tile_x, tile_y)
     surface.write_to_png(fname)
 
 
