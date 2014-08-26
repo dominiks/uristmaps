@@ -1,4 +1,4 @@
-import json
+import json, os
 
 from PIL import Image
 
@@ -59,6 +59,8 @@ for y in range(orig.size[1]):
 result = {"worldsize": orig.size[0],
           "map": biomes}
 build_dir = conf["Paths"]["build"]
+if not os.path.exists(build_dir):
+    os.makedirs(build_dir)
 with open("{}/biomes.json".format(build_dir), "w") as heightjson:
     heightjson.write(json.dumps(result))
     print("Dumped biomes into {}/biomes.json".format(build_dir))
