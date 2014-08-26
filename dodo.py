@@ -1,3 +1,5 @@
+import itertools
+
 from doit.tools import LongRunning
 
 from uristmaps import render_biome_layer
@@ -21,7 +23,7 @@ def task_read_biome_info():
         "actions": [["python", "uristmaps/load_biomes.py"]],
         "targets": ["{}/biomes.json".format(build_dir)],
         "verbosity": 2,
-        "file_dep": [] # TODO: Find the biomes file
+        "file_dep": ["{}/el.bmp".format(region_dir)] # TODO: Generalize
         }
 
 def task_load_legends():
@@ -32,18 +34,25 @@ def task_load_legends():
         "actions": [["python", "uristmaps/load_legends.py"]],
         "verbosity": 2,
         "targets": ["{}/sites.json".format(build_dir)],
-        "file_dep": ["{}/region5-legends.xml".format(region_dir)] # TODO: nay
+        "file_dep": ["{}/region5-legends.xml".format(region_dir)] # TODO: Generalize file name
         }
 
 def task_render_biome():
 
+    def list_tile_files(topdir, level):
+       """ Generate a complete list of the files that make up
+       the layer with the given zoom level in the topdir.
+       """
+       return ["{}/{}/{}/{}.png".format(topdir, level, x, y) for \
+               (x,y) in itertools.product(range(level+1), repeat=2)]
+
     for i in range(1,conf.getint("Map","max_zoom")):
         yield {
-        "name": i,
-        "verbosity": 2,
-        "actions": [(render_biome_layer.render_layer, (i,))],
-        "file_dep": ["{}/biomes.json".format(build_dir)],
-        "targets": ["{}/tiles/{}".format(output_dir, i)],
+            "name": i,
+            "verbosity": 2,
+            "actions": [(render_biome_layer.render_layer, (i,))],
+            "file_dep": ["{}/biomes.json".format(build_dir)],
+            "targets": list_tile_files("{}/tiles".format(output_dir),i),
         }
 
 def task_dist_legends():
