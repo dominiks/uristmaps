@@ -109,11 +109,9 @@ def render_tile(tile_x, tile_y, level, zoom_offset, biomes):
 
             world_x = int(global_tile_x - clear_tiles)
             world_y = int(global_tile_y - clear_tiles)
-            ctx.save()
-            ctx.translate(render_tile_x * graphic_size, render_tile_y * graphic_size)
+            ctx.move_to(render_tile_x * graphic_size, render_tile_y * graphic_size)
             ctx.set_source_surface(get_surface(biomes["map"][world_y][world_x], graphic_size))
             ctx.paint()
-            ctx.restore()
 
     target_dir = "{}/tiles/{}/{}/".format(paths["output"], level, tile_x)
     if not os.path.exists(target_dir):
@@ -124,5 +122,5 @@ def render_tile(tile_x, tile_y, level, zoom_offset, biomes):
 
 
 if __name__ == "__main__":
-    render_layer(3)
+    render_layer(5)
 
