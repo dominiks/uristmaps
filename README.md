@@ -19,7 +19,12 @@ See the `config.cfg` file and configure the directories to point to the correct 
 
     doit
 
-To start a render of the world.
+To start a render of the world. To quickly start a webserver that you can view the map with
+use
+
+    doit host
+
+The map will be accessible under http://localhost:8000/
 
 ### Advanced
 
