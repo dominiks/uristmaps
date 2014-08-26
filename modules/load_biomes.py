@@ -2,7 +2,9 @@ import json
 
 from PIL import Image
 
-orig = Image.open("maps/world_graphic-bm-region5-250--10081.bmp")
+from config import conf
+
+orig = Image.open("{}/world_graphic-bm-region5-250--10081.bmp".format(conf["Paths"]["region"]))
 pixels = orig.load()
 print("Found biomes map @{}x{}".format(orig.size[0], orig.size[1]))
 
@@ -56,7 +58,8 @@ for y in range(orig.size[1]):
 
 result = {"worldsize": orig.size[0],
           "map": biomes}
-with open("build/biomes.json", "w") as heightjson:
+build_dir = conf["Paths"]["build"]
+with open("{}/biomes.json".format(build_dir), "w") as heightjson:
     heightjson.write(json.dumps(result))
-    print("Dumped biomes into build/biomes.json")
+    print("Dumped biomes into {}/biomes.json".format(build_dir))
 
