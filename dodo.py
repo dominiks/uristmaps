@@ -28,13 +28,13 @@ def task_load_legends():
         "targets": ["{}/sites.json".format(build_dir)],
         }
 
-def task_render_biomes():
+def task_render_biome():
 
     for i in range(1,conf.getint("Map","max_zoom")):
         yield {
-        "name": "zoom level {}".format(i),
+        "name": i,
         "verbosity": 2,
-        "actions": [render_biome_layer.render_layer(i)],
+        "actions": [(render_biome_layer.render_layer, (i,))],
         "file_dep": ["{}/biomes.json".format(build_dir)]
         }
 
