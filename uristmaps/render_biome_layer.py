@@ -3,10 +3,6 @@ import json
 import math
 import itertools
 
-import cairocffi
-cairocffi.install_as_pycairo()
-import cairo
-
 from clint.textui import progress
 
 from PIL import Image
@@ -15,17 +11,17 @@ from uristmaps.config import conf
 
 # Caches the surface objects created from png files so they are
 # only created once.
-SURFACE_CACHE = {}
+IMAGE_CACHE = {}
 
 paths = conf["Paths"] # Reference to that conf section to make the lines a bit shorter. Unlinke this one which still gets really long.
 
-def get_surface(biome, size):
+def get_image(biome, size):
     """ Resolve the surface image for the given biome and image size.
     """
-    if size not in SURFACE_CACHE:
-        SURFACE_CACHE[size] = {}
-    elif biome in SURFACE_CACHE[size]:
-        return SURFACE_CACHE[size][biome]
+    if size not in IMAGE_CACHE:
+        IMAGE_CACHE[size] = {}
+    elif biome in IMAGE_CACHE[size]:
+        return IMAGE_CACHE[size][biome]
 
     if size == 1 or size == 2:
         biome = "arctic_ocean"
@@ -33,11 +29,12 @@ def get_surface(biome, size):
 
     if not os.path.exists(fname):
             print("File not found: {}".format(fname))
-    surface = cairo.ImageSurface.create_from_png(fname)
-    if surface.get_width() != size or surface.get_height() != size:
-        print("WARN: image {} not in requested size ({}). Is {}.".format(fname, size, surface.get_width()))
-    SURFACE_CACHE[size][biome] = surface
-    return surface
+    image = Image.open(fname)
+    print(image.mode)
+    if image.size[0] != size or image.size[1] != size:
+        print("WARN: image {} not in requested size ({}). Is {}.".format(fname, size, image.size))
+    IMAGE_CACHE[size][biome] = image
+    return image
 
 
 def load_biomes_map():
@@ -75,11 +72,7 @@ def render_tile(tile_x, tile_y, level, zoom_offset, biomes):
     """ Render the world map tile with the given indeces at the provided level.
     """
     worldsize = biomes["worldsize"] # Convenience shortname
-    surface = cairo.ImageSurface(cairo.FORMAT_RGB24, 256, 256)
-    ctx = cairo.Context(surface)
-    with ctx:
-        ctx.set_source_rgb(1,1,1) # Black background
-        ctx.paint()
+    image = Image.new("RGB", (256, 256), "black")
 
     # The size of graphic-tiles that will be used for rendering
     graphic_size = int(math.pow(2, level - zoom_offset))
@@ -109,16 +102,16 @@ def render_tile(tile_x, tile_y, level, zoom_offset, biomes):
 
             world_x = int(global_tile_x - clear_tiles)
             world_y = int(global_tile_y - clear_tiles)
-            ctx.move_to(render_tile_x * graphic_size, render_tile_y * graphic_size)
-            ctx.set_source_surface(get_surface(biomes["map"][world_y][world_x], graphic_size))
-            ctx.paint()
+            
+            location = (render_tile_x * graphic_size, render_tile_y * graphic_size)
+            image.paste(get_image(biomes["map"][world_y][world_x], graphic_size), location)
 
     target_dir = "{}/tiles/{}/{}/".format(paths["output"], level, tile_x)
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
     fname = "{}/tiles/{}/{}/{}.png".format(paths["output"], level, tile_x, tile_y)
-    surface.write_to_png(fname)
+    image.save(fname)
 
 
 if __name__ == "__main__":
