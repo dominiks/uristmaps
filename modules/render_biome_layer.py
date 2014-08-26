@@ -21,7 +21,8 @@ paths = conf["Paths"] # Reference to that conf section to make the lines a bit s
 
 
 def get_surface(biome, size):
-    """ Resolve the surface image for the given biome and image size. """
+    """ Resolve the surface image for the given biome and image size.
+    """
     if size not in SURFACE_CACHE:
         SURFACE_CACHE[size] = {}
     elif biome in SURFACE_CACHE[size]:
@@ -41,15 +42,18 @@ def get_surface(biome, size):
 
 
 def load_biomes_map():
-    # Load heightmap json
+    """ Load heightmap json.
+    """
     with open("{}/biomes.json".format(paths["build"]),"r") as biomejson:
         biomes = json.loads(biomejson.read())
 
-    print("Found biome info @{}".format(biomes["worldsize"]))
     return biomes
 
 
-def render_biomes_layer(biomes, maxlevel):
+def render_layer(level):
+    """ Render all image tiles for the specified level.
+    """
+    biomes = load_biomes_map()
 
     # Determine wich will be the first zoom level to use graphic tiles
     # bigger than 1px:
@@ -62,21 +66,15 @@ def render_biomes_layer(biomes, maxlevel):
     # Zoom level 'zoom_offset' will be the first in which the world can
     # be rendered onto the map using 1px sized tiles.
 
-    for level in range(1, maxlevel + 1):
-        print("Render zoom level {} orthographic".format(level))
+    tile_amount = int(math.pow(2,level))
 
-        # Size of the worldmap in map-tiles (256x256 px)
-        # We are always rendering square maps, so width&height are the
-        # same and the same amount of tiles will be used for width&height.
-        tile_amount = int(math.pow(2,level))
-
-        for x, y in progress.bar(itertools.product(range(tile_amount), repeat=2), expected_size=math.pow(tile_amount,2)):
-        #for x, y in itertools.product(range(tile_amount), repeat=2):
-            render_tile(x, y, level, zoom_offset)
+    for x, y in progress.bar(itertools.product(range(tile_amount), repeat=2), expected_size=math.pow(tile_amount,2)):
+        render_tile(x, y, level, zoom_offset, biomes)
 
 
-def render_tile(tile_x, tile_y, level, zoom_offset):
-    """ Render the world map tile with the given indeces at the provided level. """
+def render_tile(tile_x, tile_y, level, zoom_offset, biomes):
+    """ Render the world map tile with the given indeces at the provided level.
+    """
     worldsize = biomes["worldsize"] # Convenience shortname
     surface = cairo.ImageSurface(cairo.FORMAT_RGB24, 256, 256)
     ctx = cairo.Context(surface)
@@ -114,10 +112,7 @@ def render_tile(tile_x, tile_y, level, zoom_offset):
             world_y = int(global_tile_y - clear_tiles)
             ctx.save()
             ctx.translate(render_tile_x * graphic_size, render_tile_y * graphic_size)
-            try:
-                ctx.set_source_surface(get_surface(biomes["map"][world_y][world_x], graphic_size))
-            except IndexError:
-                print("Accessing invalid index: {},{}".format(world_x, world_y))
+            ctx.set_source_surface(get_surface(biomes["map"][world_y][world_x], graphic_size))
             ctx.paint()
             ctx.restore()
 
@@ -130,6 +125,5 @@ def render_tile(tile_x, tile_y, level, zoom_offset):
 
 
 if __name__ == "__main__":
-    biomes = load_biomes_map()
-    render_biomes_layer(biomes, 7)
+    render_layer(3)
 

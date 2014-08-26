@@ -1,5 +1,6 @@
 from doit.tools import LongRunning
 
+from modules import render_biome_layer
 from modules.config import conf
 
 
@@ -28,12 +29,13 @@ def task_load_legends():
         }
 
 def task_render_biomes():
+    print(dir(modules))
 
     for i in range(conf.getint("Map","max_zoom")):
         cmd = "python modules/render_biome_layer.py {}".format(str(i))
         yield {
         "name": "zoom level {}".format(i),
-        "actions": [LongRunning(cmd)],
+        "actions": [render_biome_layer.render_layer(i)],
         "file_dep": ["{}/biomes.json".format(build_dir)]
         }
 
