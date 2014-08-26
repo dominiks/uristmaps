@@ -53,8 +53,7 @@ def task_dist_legends():
                      "{}/assets/sites.json".format(output_dir)
                    ]],
         "file_dep": ["{}/sites.json".format(build_dir)],
-        # TODO: function to generate filenames for all tiles?
-        #"targets": ["{}/assets/sites.json".format(output_dir)]
+        "targets": ["{}/assets/sites.json".format(output_dir)]
     }
 
 def task_host():
