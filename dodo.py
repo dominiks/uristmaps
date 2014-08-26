@@ -44,9 +44,9 @@ def task_render_biome():
        the layer with the given zoom level in the topdir.
        """
        return ["{}/{}/{}/{}.png".format(topdir, level, x, y) for \
-               (x,y) in itertools.product(range(level+1), repeat=2)]
+               (x,y) in itertools.product(range(level + 1), repeat=2)]
 
-    for i in range(1,conf.getint("Map","max_zoom")):
+    for i in range(1,conf.getint("Map","max_zoom") + 1):
         yield {
             "name": i,
             "verbosity": 2,
