@@ -9,9 +9,13 @@ from uristmaps.config import conf
 # Some convenient references to configuration entries
 build_dir = conf["Paths"]["build"]
 output_dir = conf["Paths"]["output"]
+region_dir = conf["Paths"]["region"]
+
+DOIT_CONFIG = {"default_tasks": ["render_biome"]}
 
 def task_read_biome_info():
-    """read info"""
+    """ Read biome info and write the biomes.json.
+    """
 
     return {
         "actions": [["python", "uristmaps/load_biomes.py"]],
@@ -21,11 +25,14 @@ def task_read_biome_info():
         }
 
 def task_load_legends():
+    """ Read the legends.xml and export the sites.json from that.
+    """
 
     return {
         "actions": [["python", "uristmaps/load_legends.py"]],
         "verbosity": 2,
         "targets": ["{}/sites.json".format(build_dir)],
+        "file_dep": ["{}/region5-legends.xml".format(region_dir)] # TODO: nay
         }
 
 def task_render_biome():
@@ -35,7 +42,8 @@ def task_render_biome():
         "name": i,
         "verbosity": 2,
         "actions": [(render_biome_layer.render_layer, (i,))],
-        "file_dep": ["{}/biomes.json".format(build_dir)]
+        "file_dep": ["{}/biomes.json".format(build_dir)],
+        "targets": ["{}/tiles/{}".format(output_dir, i)],
         }
 
 def task_dist_legends():
@@ -45,7 +53,8 @@ def task_dist_legends():
                      "{}/assets/sites.json".format(output_dir)
                    ]],
         "file_dep": ["{}/sites.json".format(build_dir)],
-        "targets": ["{}/assets/sites.json".format(output_dir)]
+        # TODO: function to generate filenames for all tiles?
+        #"targets": ["{}/assets/sites.json".format(output_dir)]
     }
 
 def task_host():
