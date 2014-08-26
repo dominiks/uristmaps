@@ -2,8 +2,10 @@
 
 from setuptools import setup
 
+import modules
+
 setup(name="UristMaps",
-      version="0.1",
+      version=modules.__version__,
       author="Dominik Schacht",
       author_email="domschacht@gmail.com",
       description="Map renderer for Dwarf Fortress worlds.",
