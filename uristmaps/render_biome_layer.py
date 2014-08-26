@@ -1,7 +1,8 @@
-import os
+import os, sys
 import json
 import math
 import itertools
+from multiprocessing import Pool
 
 from clint.textui import progress
 
@@ -30,7 +31,6 @@ def get_image(biome, size):
     if not os.path.exists(fname):
             print("File not found: {}".format(fname))
     image = Image.open(fname)
-    print(image.mode)
     if image.size[0] != size or image.size[1] != size:
         print("WARN: image {} not in requested size ({}). Is {}.".format(fname, size, image.size))
     IMAGE_CACHE[size][biome] = image
@@ -64,8 +64,27 @@ def render_layer(level):
 
     tile_amount = int(math.pow(2,level))
 
-    for x, y in progress.bar(itertools.product(range(tile_amount), repeat=2), expected_size=math.pow(tile_amount,2)):
-        render_tile(x, y, level, zoom_offset, biomes)
+    # Setup multiprocessing pool
+    pool = Pool(4)
+
+    # Chunk the amount of tiles to render in equals parts
+    # for each process
+    chunk = tile_amount ** 2
+    chunk //= 4
+
+    # Send the tile render jobs to the pool. Generates the parameters for each tile
+    # with the get_tasks function.
+    pool.imap_unordered(render_tile_mp, get_tasks(tile_amount, level, zoom_offset, biomes), chunksize=chunk)
+    pool.close()
+    pool.join()
+
+def get_tasks(tiles, level, zoom_offset, biomes):
+    for x, y in itertools.product(range(tiles), repeat=2):
+        yield (x, y, level, zoom_offset, biomes)
+
+
+def render_tile_mp(opts):
+    render_tile(*opts)
 
 
 def render_tile(tile_x, tile_y, level, zoom_offset, biomes):
