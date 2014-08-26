@@ -11,14 +11,13 @@ from clint.textui import progress
 
 from PIL import Image
 
-from config import conf
+from uristmaps.config import conf
 
 # Caches the surface objects created from png files so they are
 # only created once.
 SURFACE_CACHE = {}
 
 paths = conf["Paths"] # Reference to that conf section to make the lines a bit shorter. Unlinke this one which still gets really long.
-
 
 def get_surface(biome, size):
     """ Resolve the surface image for the given biome and image size.

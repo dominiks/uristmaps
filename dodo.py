@@ -1,7 +1,7 @@
 from doit.tools import LongRunning
 
-from modules import render_biome_layer
-from modules.config import conf
+from uristmaps import render_biome_layer
+from uristmaps.config import conf
 
 
 # TODO: Replace cmd calls with direct python calls for better platform independence
@@ -14,7 +14,7 @@ def task_read_biome_info():
     """read info"""
 
     return {
-        "actions": [["python", "modules/load_biomes.py"]],
+        "actions": [["python", "uristmaps/load_biomes.py"]],
         "targets": ["{}/biomes.json".format(build_dir)],
         "verbosity": 2,
         "file_dep": [] # TODO: Find the biomes file
@@ -23,18 +23,17 @@ def task_read_biome_info():
 def task_load_legends():
 
     return {
-        "actions": [["python", "modules/load_legends.py"]],
+        "actions": [["python", "uristmaps/load_legends.py"]],
         "verbosity": 2,
         "targets": ["{}/sites.json".format(build_dir)],
         }
 
 def task_render_biomes():
-    print(dir(modules))
 
-    for i in range(conf.getint("Map","max_zoom")):
-        cmd = "python modules/render_biome_layer.py {}".format(str(i))
+    for i in range(1,conf.getint("Map","max_zoom")):
         yield {
         "name": "zoom level {}".format(i),
+        "verbosity": 2,
         "actions": [render_biome_layer.render_layer(i)],
         "file_dep": ["{}/biomes.json".format(build_dir)]
         }
