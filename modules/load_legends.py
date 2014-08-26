@@ -4,6 +4,8 @@ from clint.textui import puts, colored, progress, indent
 
 from bs4 import BeautifulSoup
 
+from config import conf
+
 # TODO: Determine this from somewhere
 worldsize = 272
 zoom = 0
@@ -17,7 +19,7 @@ offset = (mapsize - worldsize) // 2
 coordinate_scale = worldsize // 16
 
 def load_legends_xml():
-    fname = "maps/region5-legends.xml"
+    fname = "{}/region5-legends.xml".format(conf["Paths"]["region"])
     if not os.path.exists(fname):
         puts(colored.red("region5-legends.xml not found!"))
         return
@@ -81,7 +83,7 @@ def export_sites(soup):
         }
         features.append(feature)
 
-    with open("build/sites.json", "w") as sitesjson:
+    with open("{}/sites.json".format(conf["Paths"]["build"]), "w") as sitesjson:
         sitesjson.write(json.dumps({"type": "FeatureCollection",
                                     "features": features}))
     puts(colored.green("OK"))
