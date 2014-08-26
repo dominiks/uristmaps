@@ -4,4 +4,6 @@ output/
 build/
 *.pyc
 .directory
-
+.doit.db
+dist/
+UristMaps.egg-info/

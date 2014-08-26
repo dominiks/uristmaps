@@ -19,5 +19,13 @@ See the `config.cfg` file and configure the directories to point to the correct 
 
     doit
 
-To start a normal render of the world.
+To start a render of the world.
+
+### Advanced
+
+Some `doit`-tasks allow subtasks to be run. Use
+
+    doit render_biome:3
+
+To render zoom-level 3 of the biome layer.
 
