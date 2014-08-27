@@ -33,7 +33,8 @@
         
             L.tileLayer('/tiles/{z}/{x}/{y}.png', {
                 noWrap: true,
-                maxZoom: 7
+                maxZoom: 7,
+                attribution: "UristMaps 0.1",
             }).addTo(map);
             
             var clusters = new L.MarkerClusterGroup();

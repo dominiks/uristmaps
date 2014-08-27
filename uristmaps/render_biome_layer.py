@@ -127,6 +127,8 @@ def render_tile(tile_x, tile_y, level, zoom_offset, biomes):
             location = (render_tile_x * graphic_size, render_tile_y * graphic_size)
             image.paste(get_image(biomes["map"][world_y][world_x], graphic_size), location)
 
+            # TODO: Read the structures export to place tower/town sprites ontop the biomes
+
     target_dir = "{}/tiles/{}/{}/".format(paths["output"], level, tile_x)
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
