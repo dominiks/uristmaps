@@ -1,4 +1,4 @@
-import itertools
+import itertools, shutil, os
 
 from doit.tools import LongRunning
 
@@ -56,11 +56,11 @@ def task_render_biome():
         }
 
 def task_dist_legends():
+
     return {
-        "actions": [["cp",
-                     "{}/sites.json".format(build_dir),
-                     "{}/assets/sites.json".format(output_dir)
-                   ]],
+        "actions": [(copy, ("{}/sites.json".format(build_dir),
+                            "{}/assets/sites.json".format(output_dir))
+                   )],
         "file_dep": ["{}/sites.json".format(build_dir)],
         "targets": ["{}/assets/sites.json".format(output_dir)]
     }
@@ -72,3 +72,16 @@ def task_host():
     return {
         "actions": [LongRunning(cmd)]
     }
+
+
+def copy(src,dst):
+    """ Copy a file.
+    Using shutil.copyfile directly as an action for the task resulted in
+    an exception so here is the copy call in its own function and it
+    can also create the target directory if it does not exist.
+    """
+    dstdir = os.path.dirname(dst)
+    if not os.path.exists(dstdir):
+        os.makedirs(dstdir)
+    shutil.copyfile(src, dst)
+
