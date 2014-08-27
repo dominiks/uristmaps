@@ -7,10 +7,10 @@ base_dir = ..
 # Where the exported files are stored
 region = %(base_dir)s/export_40_8
 
-# Where to place build files
+# Where to place build files You don't really need to change this.
 build = %(base_dir)s/build
 
-# Where the created map will be placed
+# Where the created map will be placed. This folder will then contain an index.html
 output = %(base_dir)s/output
 
 # Location of the tileset for biome rendering
