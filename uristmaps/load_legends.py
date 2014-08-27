@@ -69,7 +69,7 @@ def export_sites(soup):
                     "name": site.find_next("name").text,
                     "amenity": site.find_next("type").text,
                     "id": site.find_next("id").text,
-                    "img": "/assets/icons/{}.png".format(site.find_next("type").text.replace(" ", "_")),
+                    "img": "/icons/{}.png".format(site.find_next("type").text.replace(" ", "_")),
                     "popupContent": """{}<br>
                     Type: {}<br>
                     Coords: {}
@@ -84,6 +84,8 @@ def export_sites(soup):
         }
         features.append(feature)
 
+    if not os.path.exists(conf["Paths"]["build"]):
+        os.makedirs(conf["Paths"]["build"])
     with open("{}/sites.json".format(conf["Paths"]["build"]), "w") as sitesjson:
         sitesjson.write(json.dumps({"type": "FeatureCollection",
                                     "features": features}))

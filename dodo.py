@@ -1,4 +1,4 @@
-import itertools, shutil, os
+import itertools, shutil, os, glob
 
 from doit.tools import LongRunning
 
@@ -13,7 +13,7 @@ build_dir = conf["Paths"]["build"]
 output_dir = conf["Paths"]["output"]
 region_dir = conf["Paths"]["region"]
 
-DOIT_CONFIG = {"default_tasks": ["dist_legends", "render_biome"]}
+DOIT_CONFIG = {"default_tasks": ["dist_legends", "render_biome", "copy_res"]}
 
 def task_read_biome_info():
     """ Read biome info and write the biomes.json.
@@ -59,10 +59,10 @@ def task_dist_legends():
 
     return {
         "actions": [(copy, ("{}/sites.json".format(build_dir),
-                            "{}/assets/sites.json".format(output_dir))
+                            "{}/js/sites.json".format(output_dir))
                    )],
         "file_dep": ["{}/sites.json".format(build_dir)],
-        "targets": ["{}/assets/sites.json".format(output_dir)]
+        "targets": ["{}/js/sites.json".format(output_dir)]
     }
 
 def task_host():
@@ -72,6 +72,36 @@ def task_host():
     return {
         "actions": [LongRunning(cmd)]
     }
+
+
+def task_copy_res():
+    return {
+        "actions" : [(copy_dir_contents, ("res", output_dir))],
+        "verbosity" : 2,
+    }
+
+
+def copy_dir_contents(src, dst):
+    """ Copy the contents of the src directory into the dst directory.
+    """
+    for item in glob.glob("{}/*".format(src)):
+        if os.path.isdir(item):
+            copy_dir(item, os.path.join(dst, os.path.relpath(item, src)))
+        else:
+            copy(item, os.path.join(dst, os.path.relpath(item, src)))
+
+def copy_dir(src, dst):
+    """ Copy the complete directory into the dst directory.
+
+    shutil.copytree should work but it fails when the dst already exists and
+    is unable to just overwrite that.
+    """
+    for root,subdirs,files in os.walk(src):
+        for sub in subdirs:
+            copy_dir(os.path.join(src, sub), os.path.join(dst, sub))
+        for f in files:
+            copy(os.path.join(root, f), 
+                 os.path.join(dst, f))
 
 
 def copy(src,dst):
