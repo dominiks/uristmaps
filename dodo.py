@@ -2,7 +2,7 @@ import itertools
 
 from doit.tools import LongRunning
 
-from uristmaps import render_biome_layer, load_legends, load_biomes
+from uristmaps import render_biome_layer, load_legends, load_biomes, mapfinder
 from uristmaps.config import conf
 
 
@@ -13,17 +13,17 @@ build_dir = conf["Paths"]["build"]
 output_dir = conf["Paths"]["output"]
 region_dir = conf["Paths"]["region"]
 
-DOIT_CONFIG = {"default_tasks": ["render_biome"]}
+DOIT_CONFIG = {"default_tasks": ["dist_legends", "render_biome"]}
 
 def task_read_biome_info():
     """ Read biome info and write the biomes.json.
     """
 
     return {
-        "actions": [load_biomes.load()],
+        "actions": [load_biomes.load],
         "targets": ["{}/biomes.json".format(build_dir)],
         "verbosity": 2,
-        "file_dep": ["{}/el.bmp".format(region_dir)] # TODO: Generalize
+        "file_dep": [mapfinder.biome_map()]
         }
 
 def task_load_legends():

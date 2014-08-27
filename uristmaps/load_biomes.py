@@ -3,9 +3,10 @@ import json, os, logging
 from PIL import Image
 
 from uristmaps.config import conf
+from uristmaps.mapfinder import biome_map
 
 def load():
-    orig = Image.open("{}/world_graphic-bm-region5-250--10081.bmp".format(conf["Paths"]["region"]))
+    orig = Image.open(biome_map())
     logging.debug("Loaded world sized {0}x{0}".format(orig.size[0]))
     pixels = orig.load()
 
