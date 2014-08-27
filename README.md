@@ -3,8 +3,10 @@ Urist Maps
 
 Renders a Google Maps like view of a Dwarf Fortress world using Leaflet.js.
 
-Installation
-------------
+Quickstart
+----------
+
+### 1 Setup UristMaps
 
 Clone the repository into a virtualenv and execute
 
@@ -12,8 +14,14 @@ Clone the repository into a virtualenv and execute
 
 To install the dependencies.
 
-How to run
-----------
+### 2 Export the world in DF
+
+Start a new game in your world and select Legends-mode. Export:
+
+1. XML-Dump
+2. Biome Map
+
+### 3 Create the UristMap
 
 See the `config.cfg` file and configure the directories to point to the correct locations. Then start 
 
@@ -26,7 +34,8 @@ use
 
 The map will be accessible under http://localhost:8000/
 
-### Advanced
+Advanced
+--------
 
 Some `doit`-tasks allow subtasks to be run. Use
 
