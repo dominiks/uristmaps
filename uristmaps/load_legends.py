@@ -1,10 +1,9 @@
-import json, os, math
+import json, os, math, logging
 
-from clint.textui import puts, colored, progress, indent
-
+from clint.textui import progress
 from bs4 import BeautifulSoup
 
-from config import conf
+from uristmaps.config import conf
 
 # TODO: Determine this from somewhere
 worldsize = 272
@@ -24,14 +23,15 @@ def load_legends_xml():
         puts(colored.red("region5-legends.xml not found!"))
         return
    
-    puts("Reading legends xml ({} Mb)".format(os.path.getsize(fname) // 1024 // 1024))
+    logging.debug("Reading legends xml ({} Mb)".format(os.path.getsize(fname) // 1024 // 1024))
     lines = []
     with open(fname, "r") as xmlfile:
+        logging.info("Loading legends.xml file.")
         for line in progress.dots(xmlfile, every=1000):
             lines.append(line)
-    puts("Processing xml...")
+    logging.debug("Processing xml.")
     soup = BeautifulSoup("".join(lines), "xml")
-    puts(colored.green("Loaded xml file."))
+    logging.debug("Loaded xml file.")
 
     return soup
 
@@ -59,10 +59,11 @@ def num2deg(xtile, ytile):
 def export_sites(soup):
     """ Iterate over all sites and create a GeoJSON FeatureCollection.
     """
-    puts("Loading sites...")
+    sites = soup.find_all("site")
+    logging.debug("Loading {} sites...".format(len(sites)))
 
     features = []
-    for site in progress.bar(soup.find_all("site")):
+    for site in sites:
         feature = {"type":"Feature",
                 "properties": {
                     "name": site.find_next("name").text,
@@ -86,9 +87,8 @@ def export_sites(soup):
     with open("{}/sites.json".format(conf["Paths"]["build"]), "w") as sitesjson:
         sitesjson.write(json.dumps({"type": "FeatureCollection",
                                     "features": features}))
-    puts(colored.green("OK"))
 
 
-if __name__ == "__main__":
+def load():
     soup = load_legends_xml()
     export_sites(soup)

@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, logging
 import json
 import math
 import itertools
@@ -29,10 +29,10 @@ def get_image(biome, size):
     fname = "{}/{}/{}.png".format(paths["biome_tiles"], size, biome)
 
     if not os.path.exists(fname):
-            print("File not found: {}".format(fname))
+            logging.warning("File not found: {}".format(fname))
     image = Image.open(fname)
     if image.size[0] != size or image.size[1] != size:
-        print("WARN: image {} not in requested size ({}). Is {}.".format(fname, size, image.size))
+        logging.warning("Image {} not in requested size ({}). Is {}.".format(fname, size, image.size))
     IMAGE_CACHE[size][biome] = image
     return image
 

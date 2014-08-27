@@ -2,7 +2,7 @@ import itertools
 
 from doit.tools import LongRunning
 
-from uristmaps import render_biome_layer
+from uristmaps import render_biome_layer, load_legends, load_biomes
 from uristmaps.config import conf
 
 
@@ -20,7 +20,7 @@ def task_read_biome_info():
     """
 
     return {
-        "actions": [["python", "uristmaps/load_biomes.py"]],
+        "actions": [load_biomes.load()],
         "targets": ["{}/biomes.json".format(build_dir)],
         "verbosity": 2,
         "file_dep": ["{}/el.bmp".format(region_dir)] # TODO: Generalize
@@ -31,7 +31,7 @@ def task_load_legends():
     """
 
     return {
-        "actions": [["python", "uristmaps/load_legends.py"]],
+        "actions": [load_legends.load],
         "verbosity": 2,
         "targets": ["{}/sites.json".format(build_dir)],
         "file_dep": ["{}/region5-legends.xml".format(region_dir)] # TODO: Generalize file name

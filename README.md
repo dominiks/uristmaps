@@ -41,7 +41,7 @@ Advanced
 
 If you want to render multiple worlds each one needs its own config file. You can specify which config file to use when starting uristmaps:
 
-    doit conf=<config_file.cfg>
+    doit conf=config_file.cfg
 
 
 

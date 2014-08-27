@@ -1,14 +1,15 @@
-import json, os
+import json, os, logging
 
 from PIL import Image
 
-from config import conf
+from uristmaps.config import conf
 
-orig = Image.open("{}/world_graphic-bm-region5-250--10081.bmp".format(conf["Paths"]["region"]))
-pixels = orig.load()
-print("Found biomes map @{}x{}".format(orig.size[0], orig.size[1]))
+def load():
+    orig = Image.open("{}/world_graphic-bm-region5-250--10081.bmp".format(conf["Paths"]["region"]))
+    logging.debug("Loaded world sized {0}x{0}".format(orig.size[0]))
+    pixels = orig.load()
 
-BIOMES = {
+    BIOMES = {
         (128,128,128): "mountain",
         (0,224,255): "temperate_freshwater_lake",
         (0,192,255): "temperate brackish_lake",
@@ -45,23 +46,21 @@ BIOMES = {
         (255,96,32): "badland_desert",
         (255,255,0): "sand_desert",
         (255,128,64): "rock_desert",
-}
-print("Loaded biomes def")
+    }
 
-print("Generating biome-map.")
-biomes = []
-for y in range(orig.size[1]):
-    row = []
-    for x in range(orig.size[0]):
-        row.append(BIOMES[pixels[(x,y)]])
-    biomes.append(row)
+    biomes = []
+    for y in range(orig.size[1]):
+        row = []
+        for x in range(orig.size[0]):
+            row.append(BIOMES[pixels[(x,y)]])
+        biomes.append(row)
 
-result = {"worldsize": orig.size[0],
-          "map": biomes}
-build_dir = conf["Paths"]["build"]
-if not os.path.exists(build_dir):
-    os.makedirs(build_dir)
-with open("{}/biomes.json".format(build_dir), "w") as heightjson:
-    heightjson.write(json.dumps(result))
-    print("Dumped biomes into {}/biomes.json".format(build_dir))
+    result = {"worldsize": orig.size[0],
+              "map": biomes}
+    build_dir = conf["Paths"]["build"]
+    if not os.path.exists(build_dir):
+        os.makedirs(build_dir)
+    with open("{}/biomes.json".format(build_dir), "w") as heightjson:
+        heightjson.write(json.dumps(result))
+        logging.debug("Dumped biomes into {}/biomes.json".format(build_dir))
 
