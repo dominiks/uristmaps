@@ -97,7 +97,7 @@ def render_tile(tile_x, tile_y, level, zoom_offset, biomes):
     """ Render the world map tile with the given indeces at the provided level.
     """
     worldsize = biomes["worldsize"] # Convenience shortname
-    image = Image.new("RGB", (256, 256), "black")
+    image = Image.new("RGB", (256, 256), "white")
 
     # The size of graphic-tiles that will be used for rendering
     graphic_size = int(math.pow(2, level - zoom_offset))
