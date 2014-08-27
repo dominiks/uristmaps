@@ -64,13 +64,15 @@ def render_layer(level):
 
     tile_amount = int(math.pow(2,level))
 
+    process_count = conf.getint("Performance", "processes")
     # Setup multiprocessing pool
-    pool = Pool(4)
+    pool = Pool(process_count)
 
     # Chunk the amount of tiles to render in equals parts
     # for each process
     chunk = tile_amount ** 2
-    chunk //= 4
+    chunk //= process_count
+    chunk = max(chunk, 1)
 
     # Send the tile render jobs to the pool. Generates the parameters for each tile
     # with the get_tasks function.
