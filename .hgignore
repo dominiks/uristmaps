@@ -8,3 +8,4 @@ build/
 dist/
 UristMaps.egg-info/
 config.cfg
+*.swp
