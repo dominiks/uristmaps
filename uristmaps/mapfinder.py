@@ -8,14 +8,22 @@ from uristmaps.config import conf
 region_dir = conf["Paths"]["region"]
 
 def biome_map():
-    """ Search for a biome-map export in the region dir and return the
+    """ Convenience method to load the biome map.
+    """
+    return load_map("bm")
+
+def load_map(key):
+    """ Search for a map export in the region dir by its keyand return the
     file's path.
+
+    Supports old and new style named export.
 
     Returns the path to the exported biome map or None when no export could be found.
     """
-    files = glob.glob(region_dir + "/*-bm.bmp")
+    files = glob.glob(region_dir + "/*-{}.bmp".format(key))
+
     if not files:
-        files = glob.glob(region_dir + "/*-bm-*.bmp")
+        files = glob.glob(region_dir + "/*-{}-*.bmp".format(key))
 
     if files:
         return files[0]
