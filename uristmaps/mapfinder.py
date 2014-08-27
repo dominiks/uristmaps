@@ -20,5 +20,6 @@ def biome_map():
     if files:
         return files[0]
 
+    raise IOError("Could not find biome export in {}!".format(region_dir))
     return None
 
