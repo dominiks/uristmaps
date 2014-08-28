@@ -4,7 +4,7 @@ from PIL import Image
 
 from uristmaps.config import conf
 
-tiles_dir = conf["Paths"]["biome_tiles"]
+tiles_dir = conf["Paths"]["tiles"]
 tilesets_dir = conf["Paths"]["tilesets"]
 
 def make_tileset(directory):
