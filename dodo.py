@@ -13,7 +13,7 @@ build_dir = conf["Paths"]["build"]
 output_dir = conf["Paths"]["output"]
 region_dir = conf["Paths"]["region"]
 tiles_dir = conf["Paths"]["tiles"]
-tileset_dir = conf["Paths"]["tilesets"]
+tilesets_dir = conf["Paths"]["tilesets"]
 
 DOIT_CONFIG = {"default_tasks": ["dist_legends", "render_sat", "copy_res"]}
 
@@ -22,10 +22,10 @@ def task_read_biome_info():
     """
 
     return {
-        "actions": [load_biomes.load],
-        "targets": ["{}/biomes.json".format(build_dir)],
-        "verbosity": 2,
-        "file_dep": [filefinder.biome_map()]
+        "actions"   : [load_biomes.load],
+        "targets"   : ["{}/biomes.json".format(build_dir)],
+        "verbosity" : 2,
+        "file_dep"  : [filefinder.biome_map()]
         }
 
 def task_load_legends():
@@ -33,11 +33,11 @@ def task_load_legends():
     """
 
     return {
-        "actions": [load_legends.load],
-        "verbosity": 2,
-        "targets": ["{}/sites.json".format(build_dir)],
-        "file_dep": [filefinder.legends_xml(),
-                     "{}/biomes.json".format(build_dir)]
+        "actions"   : [load_legends.load],
+        "verbosity" : 2,
+        "targets"   : ["{}/sites.json".format(build_dir)],
+        "file_dep"  : [filefinder.legends_xml(),
+                       "{}/biomes.json".format(build_dir)]
         }
 
 def task_render_sat():
@@ -53,11 +53,14 @@ def task_render_sat():
 
     for i in range(1,conf.getint("Map","max_zoom") + 1):
         yield {
-            "name": i,
-            "verbosity": 2,
-            "actions": [(render_sat_layer.render_layer, (i,))],
-            "file_dep": ["{}/biomes.json".format(build_dir)],
-            "targets": list_tile_files("{}/tiles".format(output_dir),i),
+            "name"      : i,
+            "verbosity" : 2,
+            "actions"   : [(render_sat_layer.render_layer, (i,))],
+
+            # TODO: Make this depend on the tilesheet for the imagesize that would be used
+            #       for this zoom level.
+            "file_dep"  : ["{}/biomes.json".format(build_dir)],
+            "targets"   : list_tile_files("{}/tiles".format(output_dir),i),
         }
 
 def task_dist_legends():
@@ -65,11 +68,11 @@ def task_dist_legends():
     """
 
     return {
-        "actions": [(copy, ("{}/sites.json".format(build_dir),
-                            "{}/js/sites.json".format(output_dir))
-                   )],
-        "file_dep": ["{}/sites.json".format(build_dir)],
-        "targets": ["{}/js/sites.json".format(output_dir)]
+        "actions"  : [(copy, ("{}/sites.json".format(build_dir),
+                              "{}/js/sites.json".format(output_dir))
+                     )],
+        "file_dep" : ["{}/sites.json".format(build_dir)],
+        "targets"  : ["{}/js/sites.json".format(output_dir)]
     }
 
 def task_host():
@@ -77,7 +80,7 @@ def task_host():
     """
     cmd = "cd {} && python -m http.server".format(output_dir)
     return {
-        "actions": [LongRunning(cmd)]
+        "actions" : [LongRunning(cmd)]
     }
 
 
@@ -94,11 +97,18 @@ def task_create_tilesets():
     images that will be used in rendering.
     """
     for dirname in glob.glob("{}/*".format(tiles_dir)):
+        name = os.path.basename(dirname)
         yield {
-            "name"      : dirname,
+            "name"      : name,
             "actions"   : [(tilesets.make_tileset, (dirname,))],
             "verbosity" : 2,
-            "file_dep" : glob.glob(os.path.join(tiles_dir, "*.png"))
+
+            # Depends on all single images in tiles/<name>/
+            "file_dep"  : glob.glob(os.path.join(tiles_dir, name, "*.png")),
+
+            # Creates <name>.png and <name>.json in tilesets/
+            "targets"   : [os.path.join(tilesets_dir, "{}.png".format(name)),
+                           os.path.join(tilesets_dir, "{}.json".format(name))]
             }
 
 
