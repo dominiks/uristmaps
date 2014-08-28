@@ -53,31 +53,57 @@ def render_layer(level):
     process_count = conf.getint("Performance", "processes")
 
     # Chunk the amount of tiles to render in equals parts
-    # for each process
+    # for each process. This would be the ideal chunk size to keep
+    # processes from coming back the pool to get more work. That just
+    # costs time apparently.
     chunk = tile_amount ** 2
+
+    # Limiting the chunksize helps getting more frequent updates for the progress bar
+    # This slows the operation a bit down, though (about 1.5sek for zoom lvl 6...)
+    chunk = min(chunk, 2048)
     
-    # Have maximum as many processes as there are chunks to keep the chunk size over 1
+    # Have maximum as many processes as there are chunks so we don't have more
+    # processes than there is work available.
     process_count = min(process_count, chunk)
     chunk //= process_count
 
     # Setup multiprocessing pool
     pool = Pool(process_count)
 
+    # Load the tilesheet
     TILES = tilesets.get_tileset(graphic_size)
 
     # Send the tile render jobs to the pool. Generates the parameters for each tile
     # with the get_tasks function.
-    pool.imap_unordered(render_tile_mp, get_tasks(tile_amount, level, zoom_offset, biomes, TILES), chunksize=chunk)
+    a = pool.imap_unordered(render_tile_mp, get_tasks(tile_amount, level, zoom_offset, biomes, TILES), chunksize=chunk)
+
+    counter = 0
+    total = tile_amount**2
+
+    # Show a nice progress bar with integrated ETA estimation
+    with progress.Bar(label="Rendering tiles ", expected_size=total) as bar:
+        for b in a:
+            counter += 1
+            bar.show(counter)
+
     pool.close()
     pool.join()
 
 
 def get_tasks(tileamount, level, zoom_offset, biomes, tiles):
+    """ Generate the parameters for render_tile_mp calls for every tile
+    that will be rendered. Each set of parameters is a single task for a
+    process.
+    """
     for x, y in itertools.product(range(tileamount), repeat=2):
         yield (x, y, level, zoom_offset, biomes, tiles)
 
 
 def render_tile_mp(opts):
+    """ Wrapper function used by the process pool to call render_tile.
+    Unpacks the list of parameters and retrieves the exceptions that
+    might be raised in the processes and get otherwise lost.
+    """
     try:
         render_tile(*opts)
     except Exception as e:
