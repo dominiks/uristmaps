@@ -16,6 +16,9 @@ output = %(base_dir)s/output
 # Location of the tileset for biome rendering
 biome_tiles = tiles
 
+# Location of the tileset images that are created from the single tiles
+tilesets = tilesets
+
 [Performance]
 processes = 8
 
