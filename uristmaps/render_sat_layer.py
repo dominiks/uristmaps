@@ -1,4 +1,4 @@
-import os, sys, logging
+import os, sys, logging, traceback
 import json
 import math
 import itertools
@@ -8,33 +8,11 @@ from clint.textui import progress
 
 from PIL import Image
 
+from uristmaps import tilesets
 from uristmaps.config import conf
 
-# Caches the surface objects created from png files so they are
-# only created once.
-IMAGE_CACHE = {}
 
 paths = conf["Paths"] # Reference to that conf section to make the lines a bit shorter. Unlinke this one which still gets really long.
-
-def get_image(biome, size):
-    """ Resolve the surface image for the given biome and image size.
-    """
-    if size not in IMAGE_CACHE:
-        IMAGE_CACHE[size] = {}
-    elif biome in IMAGE_CACHE[size]:
-        return IMAGE_CACHE[size][biome]
-
-    if size == 1 or size == 2:
-        biome = "arctic_ocean"
-    fname = "{}/{}/{}.png".format(paths["biome_tiles"], size, biome)
-
-    if not os.path.exists(fname):
-            logging.warning("File not found: {}".format(fname))
-    image = Image.open(fname)
-    if image.size[0] != size or image.size[1] != size:
-        logging.warning("Image {} not in requested size ({}). Is {}.".format(fname, size, image.size))
-    IMAGE_CACHE[size][biome] = image
-    return image
 
 
 def load_biomes_map():
@@ -78,22 +56,30 @@ def render_layer(level):
     # Setup multiprocessing pool
     pool = Pool(process_count)
 
+    graphic_size = int(math.pow(2, level - zoom_offset))
+    TILES = tilesets.get_tileset(graphic_size)
+
     # Send the tile render jobs to the pool. Generates the parameters for each tile
     # with the get_tasks function.
-    pool.imap_unordered(render_tile_mp, get_tasks(tile_amount, level, zoom_offset, biomes), chunksize=chunk)
+    pool.imap_unordered(render_tile_mp, get_tasks(tile_amount, level, zoom_offset, biomes, TILES), chunksize=chunk)
     pool.close()
     pool.join()
 
-def get_tasks(tiles, level, zoom_offset, biomes):
-    for x, y in itertools.product(range(tiles), repeat=2):
-        yield (x, y, level, zoom_offset, biomes)
+
+def get_tasks(tileamount, level, zoom_offset, biomes, tiles):
+    for x, y in itertools.product(range(tileamount), repeat=2):
+        yield (x, y, level, zoom_offset, biomes, tiles)
 
 
 def render_tile_mp(opts):
-    render_tile(*opts)
+    try:
+        render_tile(*opts)
+    except Exception as e:
+        print("Exception in working process: {}".format(type(e)))
+        traceback.print_exc()
 
 
-def render_tile(tile_x, tile_y, level, zoom_offset, biomes):
+def render_tile(tile_x, tile_y, level, zoom_offset, biomes, tiles):
     """ Render the world map tile with the given indeces at the provided level.
     """
     worldsize = biomes["worldsize"] # Convenience shortname
@@ -129,7 +115,8 @@ def render_tile(tile_x, tile_y, level, zoom_offset, biomes):
             world_y = int(global_tile_y - clear_tiles)
             
             location = (render_tile_x * graphic_size, render_tile_y * graphic_size)
-            image.paste(get_image(biomes["map"][world_y][world_x], graphic_size), location)
+            img = tiles[biomes["map"][world_y][world_x]]
+            image.paste(img, location)
 
             # TODO: Read the structures export to place tower/town sprites ontop the biomes
 
