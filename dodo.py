@@ -2,7 +2,7 @@ import itertools, shutil, os, glob
 
 from doit.tools import LongRunning
 
-from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder
+from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder, tilesets
 from uristmaps.config import conf
 
 
@@ -12,6 +12,7 @@ from uristmaps.config import conf
 build_dir = conf["Paths"]["build"]
 output_dir = conf["Paths"]["output"]
 region_dir = conf["Paths"]["region"]
+tiles_dir = conf["Paths"]["biome_tiles"]
 
 DOIT_CONFIG = {"default_tasks": ["dist_legends", "render_sat", "copy_res"]}
 
@@ -80,6 +81,14 @@ def task_copy_res():
         "actions" : [(copy_dir_contents, ("res", output_dir))],
         "verbosity" : 2,
     }
+
+def task_create_tilesets():
+    for dirname in glob.glob("{}/*".format(tiles_dir)):
+        yield {
+            "name": dirname,
+            "actions": [(tilesets.make_tileset, (dirname,))],
+            "verbosity" : 2,
+            }
 
 
 def copy_dir_contents(src, dst):
