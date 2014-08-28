@@ -42,6 +42,13 @@ def render_layer(level):
 
     tile_amount = int(math.pow(2,level))
 
+    graphic_size = int(math.pow(2, level - zoom_offset))
+
+    # Dont render this layer when the world would not even fit if the tiles were 1px big
+    # TODO: Find way to render this: Only draw every <n> world tiles or render big and scale down
+    if graphic_size == 0:
+        return
+
     # Read max number of processes
     process_count = conf.getint("Performance", "processes")
 
@@ -56,7 +63,6 @@ def render_layer(level):
     # Setup multiprocessing pool
     pool = Pool(process_count)
 
-    graphic_size = int(math.pow(2, level - zoom_offset))
     TILES = tilesets.get_tileset(graphic_size)
 
     # Send the tile render jobs to the pool. Generates the parameters for each tile
