@@ -4,9 +4,9 @@ from clint.textui import progress
 from bs4 import BeautifulSoup
 
 from uristmaps.config import conf
+from uristmaps.filefinder import legends_xml
 
-# Determines how big a site' coordinates point is in world tiles.
-coordinate_scale = None
+df_tilesize = 16
 
 # Offset of the world within the rendered map area.
 offset = None
@@ -30,13 +30,7 @@ def load_legends_xml():
     mapsize = 2**zoom
     offset = (mapsize - worldsize) // 2
 
-    coordinate_scale = worldsize // 16
-
-    fname = "{}/region5-legends.xml".format(conf["Paths"]["region"])
-    if not os.path.exists(fname):
-        puts(colored.red("region5-legends.xml not found!"))
-        return
-   
+    fname = legends_xml()
     logging.debug("Reading legends xml ({} Mb)".format(os.path.getsize(fname) // 1024 // 1024))
     lines = []
     with open(fname, "r") as xmlfile:
@@ -56,12 +50,12 @@ def num2deg(xtile, ytile):
     """
 
     # The world coordinates are transformed:
-    #   1. Multiply by the coordinate_scale to properly project them on the
+    #   1. Multiply by the size of a world tile to properly project them on the
     #      df world map (which uses 16 units big tiles)
     #   2. Move them by the offset along to get them into the centered world render
     #   3. Move them by half tile size to center them into this df world tile.
-    xtile = int(xtile) * coordinate_scale + offset + coordinate_scale // 2
-    ytile = int(ytile) * coordinate_scale + offset + coordinate_scale // 2
+    xtile = int(xtile) * df_tilesize + offset + df_tilesize // 2
+    ytile = int(ytile) * df_tilesize + offset + df_tilesize // 2
 
     # latlon magic from osm ( http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_numbers_to_lon..2Flat._2 )
     n = 2.0 ** zoom

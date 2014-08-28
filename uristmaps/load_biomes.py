@@ -3,7 +3,7 @@ import json, os, logging
 from PIL import Image
 
 from uristmaps.config import conf
-from uristmaps.mapfinder import biome_map
+from uristmaps.filefinder import biome_map
 
 def load():
     orig = Image.open(biome_map())

@@ -12,13 +12,25 @@ def biome_map():
     """
     return load_map("bm")
 
+def legends_xml():
+    """ Find the legends.xml file.
+    """
+    files = glob.glob(region_dir + "/*-legends.xml")
+
+    if files:
+        return files[0]
+
+    raise IOError("Could not find biome export in {}!".format(region_dir))
+    return None
+    
+
 def load_map(key):
     """ Search for a map export in the region dir by its keyand return the
     file's path.
 
     Supports old and new style named export.
 
-    Returns the path to the exported biome map or None when no export could be found.
+    Returns the path to the exported map or None when no export could be found.
     """
     files = glob.glob(region_dir + "/*-{}.bmp".format(key))
 
@@ -28,6 +40,6 @@ def load_map(key):
     if files:
         return files[0]
 
-    raise IOError("Could not find biome export in {}!".format(region_dir))
+    raise IOError("Could not find map export '{}' in {}!".format(key, region_dir))
     return None
 
