@@ -5,19 +5,33 @@ from bs4 import BeautifulSoup
 
 from uristmaps.config import conf
 
-# TODO: Determine this from somewhere
-worldsize = 272
-zoom = 0
-while 2 ** zoom < worldsize:
-    zoom += 1
-
-mapsize = 2**zoom
-offset = (mapsize - worldsize) // 2
-
 # Determines how big a site' coordinates point is in world tiles.
-coordinate_scale = worldsize // 16
+coordinate_scale = None
+
+# Offset of the world within the rendered map area.
+offset = None
+
+# Minimum zoom level to fit all world coodinates in a rendered map using 1px big tiles.
+zoom = None
 
 def load_legends_xml():
+    global offset
+    global coordinate_scale
+    global zoom
+
+    with open("{}/biomes.json".format(conf["Paths"]["build"])) as biomjs:
+        biomes = json.loads(biomjs.read())
+    worldsize = biomes["worldsize"]
+
+    zoom = 0
+    while 2 ** zoom < worldsize:
+        zoom += 1
+
+    mapsize = 2**zoom
+    offset = (mapsize - worldsize) // 2
+
+    coordinate_scale = worldsize // 16
+
     fname = "{}/region5-legends.xml".format(conf["Paths"]["region"])
     if not os.path.exists(fname):
         puts(colored.red("region5-legends.xml not found!"))

@@ -34,7 +34,8 @@ def task_load_legends():
         "actions": [load_legends.load],
         "verbosity": 2,
         "targets": ["{}/sites.json".format(build_dir)],
-        "file_dep": ["{}/region5-legends.xml".format(region_dir)] # TODO: Generalize file name
+        "file_dep": ["{}/region5-legends.xml".format(region_dir),
+                     "{}/biomes.json".format(build_dir)]
         }
 
 def task_render_sat():
