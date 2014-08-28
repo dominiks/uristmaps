@@ -2,7 +2,7 @@ import itertools, shutil, os, glob
 
 from doit.tools import LongRunning
 
-from uristmaps import render_biome_layer, load_legends, load_biomes, mapfinder
+from uristmaps import render_sat_layer, load_legends, load_biomes, mapfinder
 from uristmaps.config import conf
 
 
@@ -13,7 +13,7 @@ build_dir = conf["Paths"]["build"]
 output_dir = conf["Paths"]["output"]
 region_dir = conf["Paths"]["region"]
 
-DOIT_CONFIG = {"default_tasks": ["dist_legends", "render_biome", "copy_res"]}
+DOIT_CONFIG = {"default_tasks": ["dist_legends", "render_sat", "copy_res"]}
 
 def task_read_biome_info():
     """ Read biome info and write the biomes.json.
@@ -37,7 +37,7 @@ def task_load_legends():
         "file_dep": ["{}/region5-legends.xml".format(region_dir)] # TODO: Generalize file name
         }
 
-def task_render_biome():
+def task_render_sat():
 
     def list_tile_files(topdir, level):
        """ Generate a complete list of the files that make up
@@ -50,7 +50,7 @@ def task_render_biome():
         yield {
             "name": i,
             "verbosity": 2,
-            "actions": [(render_biome_layer.render_layer, (i,))],
+            "actions": [(render_sat_layer.render_layer, (i,))],
             "file_dep": ["{}/biomes.json".format(build_dir)],
             "targets": list_tile_files("{}/tiles".format(output_dir),i),
         }
