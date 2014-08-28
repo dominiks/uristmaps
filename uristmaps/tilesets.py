@@ -18,9 +18,11 @@ def make_tileset(directory):
 
     files = glob.glob("{}/*.*".format(directory))
 
+    # Create the smallest square image that can contain all tiles
     image_size = math.ceil(math.sqrt(len(files)))
     tile_image = Image.new("RGB", (image_size * tile_size, image_size * tile_size), "white")
 
+    # The image index stores the locations of the tiles within the tileset
     img_index = {}
     x,y = 0,0
     for img_file in files:
@@ -34,9 +36,12 @@ def make_tileset(directory):
         else:
             x += 1
 
+    # Make sure the tilesets directory exists
+    if not os.path.exists(tilesets_dir):
+        os.makedirs(tilesets_dir)
+
     with open(os.path.join(tilesets_dir, "{}.json".format(tile_size)), "w") as jsonfile:
         jsonfile.write(json.dumps(img_index))
-
     tile_image.save(os.path.join(tilesets_dir, "{}.png".format(tile_size)))
 
 def get_tileset(image_size):
@@ -45,12 +50,13 @@ def get_tileset(image_size):
     Returns a dict {image_name : PIL.Image}
     """
     tile_image = Image.open(os.path.join(tilesets_dir, "{}.png".format(image_size)))
-    with open(os.path.join(tilesets_dir, "{}.json".format(image_size))) as js:
-        index = json.loads(js.read())
+    with open(os.path.join(tilesets_dir, "{}.json".format(image_size))) as jsonfile:
+        index = json.loads(jsonfile.read())
 
     result = {}
     for name in index:
         x,y = index[name]
-        result[name] = tile_image.crop((x,y,x+image_size, y+image_size))
-        print("{} : {}".format(name, result[name]))
+        # Create a copy of the cropped image as it is lazy and will result in errors when
+        # the tile_image object is destroyed after this function is done.
+        result[name] = tile_image.crop((x,y,x+image_size, y+image_size)).copy()
     return result
