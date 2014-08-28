@@ -41,6 +41,8 @@ def task_load_legends():
         }
 
 def task_render_sat():
+    """ Render the map layers for the 'satellite'-like view of the world.
+    """
 
     def list_tile_files(topdir, level):
        """ Generate a complete list of the files that make up
@@ -59,6 +61,8 @@ def task_render_sat():
         }
 
 def task_dist_legends():
+    """ Copy the legends json into the output directory.
+    """
 
     return {
         "actions": [(copy, ("{}/sites.json".format(build_dir),
@@ -78,12 +82,17 @@ def task_host():
 
 
 def task_copy_res():
+    """ Copy static HTML resources into the output directory.
+    """
     return {
         "actions"   : [(copy_dir_contents, ("res", output_dir))],
         "verbosity" : 2,
     }
 
 def task_create_tilesets():
+    """ Paste the single tile images for each image size into tilesheet
+    images that will be used in rendering.
+    """
     for dirname in glob.glob("{}/*".format(tiles_dir)):
         yield {
             "name"      : dirname,
