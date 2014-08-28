@@ -12,7 +12,8 @@ from uristmaps.config import conf
 build_dir = conf["Paths"]["build"]
 output_dir = conf["Paths"]["output"]
 region_dir = conf["Paths"]["region"]
-tiles_dir = conf["Paths"]["biome_tiles"]
+tiles_dir = conf["Paths"]["tiles"]
+tileset_dir = conf["Paths"]["tilesets"]
 
 DOIT_CONFIG = {"default_tasks": ["dist_legends", "render_sat", "copy_res"]}
 
@@ -78,16 +79,17 @@ def task_host():
 
 def task_copy_res():
     return {
-        "actions" : [(copy_dir_contents, ("res", output_dir))],
+        "actions"   : [(copy_dir_contents, ("res", output_dir))],
         "verbosity" : 2,
     }
 
 def task_create_tilesets():
     for dirname in glob.glob("{}/*".format(tiles_dir)):
         yield {
-            "name": dirname,
-            "actions": [(tilesets.make_tileset, (dirname,))],
+            "name"      : dirname,
+            "actions"   : [(tilesets.make_tileset, (dirname,))],
             "verbosity" : 2,
+            "file_dep" : glob.glob(os.path.join(tiles_dir, "*.png"))
             }
 
 
