@@ -7,10 +7,18 @@ from uristmaps.config import conf
 
 region_dir = conf["Paths"]["region"]
 
+
 def biome_map():
     """ Convenience method to load the biome map.
     """
     return load_map("bm")
+
+
+def struct_map():
+    """ Convenience method to load the structures map.
+    """
+    return load_map("str")
+
 
 def legends_xml():
     """ Find the legends.xml file.
