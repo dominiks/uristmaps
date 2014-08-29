@@ -2,7 +2,8 @@ import itertools, shutil, os, glob
 
 from doit.tools import LongRunning
 
-from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder, tilesets
+from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder, tilesets, \
+                      load_structures
 from uristmaps.config import conf
 
 
@@ -40,6 +41,19 @@ def task_load_legends():
                        "{}/biomes.json".format(build_dir)]
         }
 
+
+def task_load_structures():
+    """ Read the legends.xml and export the sites.json from that.
+    """
+
+    return {
+        "actions"   : [load_structures.load],
+        "verbosity" : 2,
+        "targets"   : ["{}/structs.json".format(build_dir)],
+        "file_dep"  : [filefinder.struct_map()]
+        }
+
+
 def task_render_sat():
     """ Render the map layers for the 'satellite'-like view of the world.
     """
@@ -59,9 +73,11 @@ def task_render_sat():
 
             # TODO: Make this depend on the tilesheet for the imagesize that would be used
             #       for this zoom level.
-            "file_dep"  : ["{}/biomes.json".format(build_dir)],
+            "file_dep"  : ["{}/biomes.json".format(build_dir),
+                           "{}/structs.json".format(build_dir)],
             "targets"   : list_tile_files("{}/tiles".format(output_dir),i),
         }
+
 
 def task_dist_legends():
     """ Copy the legends json into the output directory.
@@ -74,6 +90,7 @@ def task_dist_legends():
         "file_dep" : ["{}/sites.json".format(build_dir)],
         "targets"  : ["{}/js/sites.json".format(output_dir)]
     }
+
 
 def task_host():
     """ Start a web server hosting the contents of the output directory.
@@ -91,6 +108,7 @@ def task_copy_res():
         "actions"   : [(copy_dir_contents, ("res", output_dir))],
         "verbosity" : 2,
     }
+
 
 def task_create_tilesets():
     """ Paste the single tile images for each image size into tilesheet
@@ -120,6 +138,7 @@ def copy_dir_contents(src, dst):
             copy_dir(item, os.path.join(dst, os.path.relpath(item, src)))
         else:
             copy(item, os.path.join(dst, os.path.relpath(item, src)))
+
 
 def copy_dir(src, dst):
     """ Copy the complete directory into the dst directory.
