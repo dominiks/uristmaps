@@ -20,7 +20,7 @@ def make_tileset(directory):
 
     # Create the smallest square image that can contain all tiles
     image_size = math.ceil(math.sqrt(len(files)))
-    tile_image = Image.new("RGB", (image_size * tile_size, image_size * tile_size), "white")
+    tile_image = Image.new("RGBA", (image_size * tile_size, image_size * tile_size), "white")
 
     # The image index stores the locations of the tiles within the tileset
     img_index = {}

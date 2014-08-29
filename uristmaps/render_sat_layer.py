@@ -23,11 +23,17 @@ def load_biomes_map():
 
     return biomes
 
+def load_structures_map():
+    with open("{}/structs.json".format(paths["build"]),"r") as structjson:
+        structs = json.loads(structjson.read())
+    return structs
+
 
 def render_layer(level):
     """ Render all image tiles for the specified level.
     """
     biomes = load_biomes_map()
+    structures = load_structures_map()
 
     # Determine wich will be the first zoom level to use graphic tiles
     # bigger than 1px:
@@ -75,13 +81,13 @@ def render_layer(level):
 
     # Send the tile render jobs to the pool. Generates the parameters for each tile
     # with the get_tasks function.
-    a = pool.imap_unordered(render_tile_mp, get_tasks(tile_amount, level, zoom_offset, biomes, TILES), chunksize=chunk)
+    a = pool.imap_unordered(render_tile_mp, get_tasks(tile_amount, level, zoom_offset, biomes, structures, TILES), chunksize=chunk)
 
     counter = 0
     total = tile_amount**2
 
     # Show a nice progress bar with integrated ETA estimation
-    with progress.Bar(label="Rendering tiles ", expected_size=total) as bar:
+    with progress.Bar(label="Using {}px sized tiles ".format(graphic_size), expected_size=total) as bar:
         for b in a:
             counter += 1
             bar.show(counter)
@@ -90,13 +96,13 @@ def render_layer(level):
     pool.join()
 
 
-def get_tasks(tileamount, level, zoom_offset, biomes, tiles):
+def get_tasks(tileamount, level, zoom_offset, biomes, structures, tiles):
     """ Generate the parameters for render_tile_mp calls for every tile
     that will be rendered. Each set of parameters is a single task for a
     process.
     """
     for x, y in itertools.product(range(tileamount), repeat=2):
-        yield (x, y, level, zoom_offset, biomes, tiles)
+        yield (x, y, level, zoom_offset, biomes, structures, tiles)
 
 
 def render_tile_mp(opts):
@@ -111,11 +117,11 @@ def render_tile_mp(opts):
         traceback.print_exc()
 
 
-def render_tile(tile_x, tile_y, level, zoom_offset, biomes, tiles):
+def render_tile(tile_x, tile_y, level, zoom_offset, biomes, structures, tiles):
     """ Render the world map tile with the given indeces at the provided level.
     """
     worldsize = biomes["worldsize"] # Convenience shortname
-    image = Image.new("RGB", (256, 256), "white")
+    image = Image.new("RGBA", (256, 256), "white")
 
     # The size of graphic-tiles that will be used for rendering
     graphic_size = int(math.pow(2, level - zoom_offset))
@@ -147,10 +153,24 @@ def render_tile(tile_x, tile_y, level, zoom_offset, biomes, tiles):
             world_y = int(global_tile_y - clear_tiles)
             
             location = (render_tile_x * graphic_size, render_tile_y * graphic_size)
+
+            # Render biome
             img = tiles[biomes["map"][world_y][world_x]]
             image.paste(img, location)
 
+            # Check if theres a structure to render on it
+
             # TODO: Read the structures export to place tower/town sprites ontop the biomes
+            try:
+                struct_name = structures["map"][str(world_x)][str(world_y)]
+                try:
+                    struct = tiles[struct_name]
+                    image.paste(struct, location, struct)
+                except:
+                    print("Could not render image: {}".format(struct_name))
+            except:
+                # No structure found
+                pass
 
     target_dir = "{}/tiles/{}/{}/".format(paths["output"], level, tile_x)
     if not os.path.exists(target_dir):
