@@ -167,7 +167,7 @@ def render_tile(tile_x, tile_y, level, zoom_offset, biomes, structures, tiles):
                     struct = tiles[struct_name]
                     image.paste(struct, location, struct)
                 except:
-                    print("Could not render image: {}".format(struct_name))
+                    log.warning("Could not render image: {}".format(struct_name))
             except:
                 # No structure found
                 pass
