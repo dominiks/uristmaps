@@ -43,9 +43,10 @@ def load():
         (150,127,20) : "other_road",
         (96,96,96)   : "stone_wall",
         (160,127,20) : "other_wall", 
+        (0,96,255)   : "lake",
+        (0,192,255)  : "river",
 # The following are not really 'structures'
 #        (255,255,192): "mountain",
-#        (0,96,255)   : "lake", # remove this?
 #        (128,64,32)  : "land",# remove this? 
 #        (0,64,255)   : "ocean",# remove this?
 #
@@ -71,11 +72,10 @@ def load():
             suffixes += "w"
         if same_type(structs, (x,y), (0,1)):
             suffixes += "s"
-        if same_type(structs, (x,y), (1,-1)):
+        if same_type(structs, (x,y), (1,0)):
             suffixes += "e"
 
         if suffixes:
-            print("Suffixes to add {}".format(suffixes))
             tile_type = "{}_{}".format(structs[(x,y)], suffixes)
             try:
                 final_tiles[x][y] = tile_type
