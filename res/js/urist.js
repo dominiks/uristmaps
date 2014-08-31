@@ -81,6 +81,8 @@ function process_loaded_sites(data) {
 
 $(function() {
     $(".site-btn").click(function() {
-        alert($(this).attr("data-id"));
+        var lat = $(this).attr("data-lat");
+        var lon = $(this).attr("data-lon");
+        map.fitBounds([[lat,lon],[lat+0.01, lon+0.01]]);
     });
 });
