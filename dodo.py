@@ -3,7 +3,7 @@ import itertools, shutil, os, glob
 from doit.tools import LongRunning
 
 from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder, tilesets, \
-                      load_structures
+                      load_structures, index
 from uristmaps.config import conf
 
 
@@ -16,7 +16,7 @@ region_dir = conf["Paths"]["region"]
 tiles_dir = conf["Paths"]["tiles"]
 tilesets_dir = conf["Paths"]["tilesets"]
 
-DOIT_CONFIG = {"default_tasks": ["dist_legends", "render_sat", "copy_res"]}
+DOIT_CONFIG = {"default_tasks": ["dist_legends", "render_sat", "dist_index", "copy_res"]}
 
 def task_read_biome_info():
     """ Read biome info and write the biomes.json.
@@ -39,6 +39,31 @@ def task_load_legends():
         "targets"   : ["{}/sites.json".format(build_dir)],
         "file_dep"  : [filefinder.legends_xml(),
                        "{}/biomes.json".format(build_dir)]
+        }
+
+
+def task_create_index():
+    """ Crate the index.html from the template and copy to build dir.
+    """
+
+    return {
+        "actions"   : [index.create],
+        "verbosity" : 2,
+        "targets"   : ["{}/index.html".format(build_dir)],
+        "file_dep"  : [] # Dunno yet
+    }
+
+
+def task_dist_index():
+    """ Copy the index.html from the build to output dir.
+    """
+
+    return {
+        "actions" : [(copy, ("{}/index.html".format(build_dir),
+                             "{}/index.html".format(output_dir)))],
+        "verbosity" : 2,
+        "targets" : [os.path.join(output_dir, "index.html")],
+        "file_dep" : [os.path.join(build_dir, "index.html")]
         }
 
 
