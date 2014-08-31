@@ -20,6 +20,16 @@ def struct_map():
     return load_map("str")
 
 
+def world_history():
+    files = glob.glob(region_dir + "/*-world_history.txt")
+
+    if files:
+        return files[0]
+
+    raise IOError("Could not find world history file in {}!".format(region_dir))
+    return None
+
+
 def legends_xml():
     """ Find the legends.xml file.
     """
@@ -28,7 +38,7 @@ def legends_xml():
     if files:
         return files[0]
 
-    raise IOError("Could not find biome export in {}!".format(region_dir))
+    raise IOError("Could not find legends xml export in {}!".format(region_dir))
     return None
     
 

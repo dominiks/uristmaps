@@ -75,7 +75,7 @@ def export_sites(soup):
         feature = {"type":"Feature",
                 "properties": {
                     "name": site.find_next("name").text,
-                    "amenity": site.find_next("type").text,
+                    "type": site.find_next("type").text,
                     "id": site.find_next("id").text,
                     "img": "/icons/{}.png".format(site.find_next("type").text.replace(" ", "_")),
                     "popupContent": """{}<br>

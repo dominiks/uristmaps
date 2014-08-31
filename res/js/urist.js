@@ -18,7 +18,7 @@ function init_uristmaps() {
     L.tileLayer('/tiles/{z}/{x}/{y}.png', {
         noWrap: true,
         maxZoom: 7,
-        attribution: "UristMaps 0.1",
+        attribution: "UristMaps " + urist_version,
     }).addTo(map);
 
     // Load the sites json containing short info for every site
@@ -78,3 +78,9 @@ function process_loaded_sites(data) {
     var icon_layer = {"Sites": clusters};
     L.control.layers({}, icon_layer).addTo(map);
 };
+
+$(function() {
+    $(".site-btn").click(function() {
+        alert($(this).attr("data-id"));
+    });
+});
