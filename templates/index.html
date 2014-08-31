@@ -47,7 +47,7 @@
 
     <h1>Sites</h1>
     {% for type_grp in sites | groupby("properties.type") %}
-    <h3>{{ type_grp.grouper | title }} ({{ type_grp.list | length }})</h3>
+    <h4>{{ type_grp.grouper | title }} ({{ type_grp.list | length }})</h4>
         <ul class="list-unstyled">
         {% for site in type_grp.list | sort(attribute="properties.name")%}
             <li>
