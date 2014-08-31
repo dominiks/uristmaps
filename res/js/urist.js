@@ -37,9 +37,11 @@ function init_buttons() {
 function setup_sidebars() {
     leftbar = L.control.sidebar("sidebar-left", {
         position: "left",
+	autoPan: false,
     });
     rightbar = L.control.sidebar("sidebar-right", {
         position: "right",
+	autoPan: false,
     });
 
     map.addControl(leftbar);
