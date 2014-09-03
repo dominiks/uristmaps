@@ -1,5 +1,7 @@
 import itertools, shutil, os, glob
 
+from os.path import join as pjoin
+
 from doit.tools import LongRunning
 
 from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder, tilesets, \
@@ -24,7 +26,7 @@ def task_read_biome_info():
 
     return {
         "actions"   : [load_biomes.load],
-        "targets"   : ["{}/biomes.json".format(build_dir)],
+        "targets"   : [pjoin(build_dir, "biomes.json")],
         "verbosity" : 2,
         "file_dep"  : [filefinder.biome_map()]
         }
@@ -36,9 +38,9 @@ def task_load_legends():
     return {
         "actions"   : [load_legends.load],
         "verbosity" : 2,
-        "targets"   : ["{}/sites.json".format(build_dir)],
+        "targets"   : [pjoin(build_dir, "sites.json")],
         "file_dep"  : [filefinder.legends_xml(),
-                       "{}/biomes.json".format(build_dir)]
+                       pjoin(build_dir, "biomes.json")]
         }
 
 
@@ -49,7 +51,7 @@ def task_create_index():
     return {
         "actions"   : [index.create],
         "verbosity" : 2,
-        "targets"   : ["{}/index.html".format(build_dir)],
+        "targets"   : [pjoin(build_dir, "index.html")],
         "file_dep"  : [] # Dunno yet
     }
 
@@ -59,11 +61,11 @@ def task_dist_index():
     """
 
     return {
-        "actions" : [(copy, ("{}/index.html".format(build_dir),
-                             "{}/index.html".format(output_dir)))],
+        "actions" : [(copy, (pjoin(build_dir, "index.html"),
+                             pjoin(output_dir, "index.html")))],
         "verbosity" : 2,
-        "targets" : [os.path.join(output_dir, "index.html")],
-        "file_dep" : [os.path.join(build_dir, "index.html")]
+        "targets" : [pjoin(output_dir, "index.html")],
+        "file_dep" : [pjoin(build_dir, "index.html")]
         }
 
 
@@ -74,7 +76,7 @@ def task_load_structures():
     return {
         "actions"   : [load_structures.load],
         "verbosity" : 2,
-        "targets"   : ["{}/structs.json".format(build_dir)],
+        "targets"   : [pjoin(build_dir, "structs.json")],
         "file_dep"  : [filefinder.struct_map()]
         }
 
@@ -87,7 +89,7 @@ def task_render_sat():
        """ Generate a complete list of the files that make up
        the layer with the given zoom level in the topdir.
        """
-       return ["{}/{}/{}/{}.png".format(topdir, level, x, y) for \
+       return [pjoin(topdir, str(level), str(x),"{}.png".format(y)) for \
                (x,y) in itertools.product(range(level + 1), repeat=2)]
 
     for i in range(1,conf.getint("Map","max_zoom") + 1):
@@ -98,9 +100,9 @@ def task_render_sat():
 
             # TODO: Make this depend on the tilesheet for the imagesize that would be used
             #       for this zoom level.
-            "file_dep"  : ["{}/biomes.json".format(build_dir),
+            "file_dep"  : [pjoin(build_dir, "biomes.json"),
                            "{}/structs.json".format(build_dir)],
-            "targets"   : list_tile_files("{}/tiles".format(output_dir),i),
+            "targets"   : list_tile_files(pjoin(output_dir, "tiles"),i),
         }
 
 
@@ -109,11 +111,11 @@ def task_dist_legends():
     """
 
     return {
-        "actions"  : [(copy, ("{}/sites.json".format(build_dir),
-                              "{}/js/sites.json".format(output_dir))
+        "actions"  : [(copy, (pjoin(build_dir, "sites.json"),
+                              pjoin(output_dir, "js", "sites.json"))
                      )],
-        "file_dep" : ["{}/sites.json".format(build_dir)],
-        "targets"  : ["{}/js/sites.json".format(output_dir)]
+        "file_dep" : [pjoin(build_dir, "sites.json")],
+        "targets"  : [pjoin(output_dir, "js", "sites.json")]
     }
 
 
@@ -147,11 +149,11 @@ def task_create_tilesets():
             "verbosity" : 2,
 
             # Depends on all single images in tiles/<name>/
-            "file_dep"  : glob.glob(os.path.join(tiles_dir, name, "*.png")),
+            "file_dep"  : glob.glob(pjoin(tiles_dir, name, "*.png")),
 
             # Creates <name>.png and <name>.json in tilesets/
-            "targets"   : [os.path.join(tilesets_dir, "{}.png".format(name)),
-                           os.path.join(tilesets_dir, "{}.json".format(name))]
+            "targets"   : [pjoin(tilesets_dir, "{}.png".format(name)),
+                           pjoin(tilesets_dir, "{}.json".format(name))]
             }
 
 
@@ -160,9 +162,9 @@ def copy_dir_contents(src, dst):
     """
     for item in glob.glob("{}/*".format(src)):
         if os.path.isdir(item):
-            copy_dir(item, os.path.join(dst, os.path.relpath(item, src)))
+            copy_dir(item, pjoin(dst, os.path.relpath(item, src)))
         else:
-            copy(item, os.path.join(dst, os.path.relpath(item, src)))
+            copy(item, pjoin(dst, os.path.relpath(item, src)))
 
 
 def copy_dir(src, dst):
@@ -173,10 +175,10 @@ def copy_dir(src, dst):
     """
     for root,subdirs,files in os.walk(src):
         for sub in subdirs:
-            copy_dir(os.path.join(src, sub), os.path.join(dst, sub))
+            copy_dir(pjoin(src, sub), pjoin(dst, sub))
         for f in files:
-            copy(os.path.join(root, f), 
-                 os.path.join(dst, f))
+            copy(pjoin(root, f), 
+                 pjoin(dst, f))
 
 
 def copy(src,dst):

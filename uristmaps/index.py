@@ -24,7 +24,10 @@ def create():
     }
 
     # Add world name
-    tpl_context["world_name"] = get_world_name()
+    try:
+        tpl_context["world_name"] = get_world_name()
+    except IOError:
+        print("Could not find world history file to resolve world name!")
 
     # Get list of sites to write into sidebar
     with open(os.path.join(build_dir, "sites.json")) as sitesjs:
