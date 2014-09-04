@@ -15,7 +15,7 @@ setup(name="UristMaps",
                         "clint",          # Pretty cli output
                         "doit",           # Quick management of tasks and execution order
                         "lxml",           # Better xml performance for bs4
-                        "beautifulsoup4", # Processing xml
+#                        "beautifulsoup4", # Processing xml
                         "jinja2",          # Rendering html files
      ]
 )
