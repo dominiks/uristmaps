@@ -5,7 +5,7 @@ from os.path import join as pjoin
 from doit.tools import LongRunning
 
 from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder, tilesets, \
-                      load_structures, index
+                      load_structures, index, uristcopy
 from uristmaps.config import conf
 
 
@@ -61,7 +61,7 @@ def task_dist_index():
     """
 
     return {
-        "actions" : [(copy, (pjoin(build_dir, "index.html"),
+        "actions" : [(uristcopy.copy, (pjoin(build_dir, "index.html"),
                              pjoin(output_dir, "index.html")))],
         "verbosity" : 2,
         "targets" : [pjoin(output_dir, "index.html")],
@@ -111,7 +111,7 @@ def task_dist_legends():
     """
 
     return {
-        "actions"  : [(copy, (pjoin(build_dir, "sites.json"),
+        "actions"  : [(uristcopy.copy, (pjoin(build_dir, "sites.json"),
                               pjoin(output_dir, "js", "sites.json"))
                      )],
         "file_dep" : [pjoin(build_dir, "sites.json")],
@@ -132,7 +132,7 @@ def task_copy_res():
     """ Copy static HTML resources into the output directory.
     """
     return {
-        "actions"   : [(copy_dir_contents, ("res", output_dir))],
+        "actions"   : [(uristcopy.copy_dir_contents, ("res", output_dir))],
         "verbosity" : 2,
     }
 
@@ -141,7 +141,7 @@ def task_biome_legend():
     """ Copy 32px images for biome rendering into the output dir.
     """
     return {
-        "actions"   : [(copy_dir, (pjoin(tiles_dir, "32"),
+        "actions"   : [(uristcopy.copy_dir, (pjoin(tiles_dir, "32"),
                                    pjoin(output_dir, "biome_legend")))],
         "verbosity" : 2,
     }
@@ -165,40 +165,3 @@ def task_create_tilesets():
             "targets"   : [pjoin(tilesets_dir, "{}.png".format(name)),
                            pjoin(tilesets_dir, "{}.json".format(name))]
             }
-
-
-def copy_dir_contents(src, dst):
-    """ Copy the contents of the src directory into the dst directory.
-    """
-    for item in glob.glob("{}/*".format(src)):
-        if os.path.isdir(item):
-            copy_dir(item, pjoin(dst, os.path.relpath(item, src)))
-        else:
-            copy(item, pjoin(dst, os.path.relpath(item, src)))
-
-
-def copy_dir(src, dst):
-    """ Copy the complete directory into the dst directory.
-
-    shutil.copytree should work but it fails when the dst already exists and
-    is unable to just overwrite that.
-    """
-    for root,subdirs,files in os.walk(src):
-        for sub in subdirs:
-            copy_dir(pjoin(src, sub), pjoin(dst, sub))
-        for f in files:
-            copy(pjoin(root, f), 
-                 pjoin(dst, f))
-
-
-def copy(src,dst):
-    """ Copy a file.
-    Using shutil.copyfile directly as an action for the task resulted in
-    an exception so here is the copy call in its own function and it
-    can also create the target directory if it does not exist.
-    """
-    dstdir = os.path.dirname(dst)
-    if not os.path.exists(dstdir):
-        os.makedirs(dstdir)
-    shutil.copyfile(src, dst)
-
