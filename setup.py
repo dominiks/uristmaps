@@ -16,7 +16,7 @@ setup(name="UristMaps",
                         "doit",           # Quick management of tasks and execution order
                         "lxml",           # Better xml performance for bs4
                         "beautifulsoup4", # Processing xml
-                        "jinja",          # Rendering html files
+                        "jinja2",          # Rendering html files
      ]
 )
 
