@@ -32,6 +32,12 @@ function init_buttons() {
     btn_sitelist = L.easyButton("fa-bars",
         btn_sitelist_clicked,
         "Show list of sites");
+
+    btn_legend = L.easyButton("fa-question-circle",
+        btn_legend_clicked,
+        "Show legend for the current overlay","");
+    btn_legend.options.position = "bottomright";
+    map.addControl(btn_legend);
 };
 
 function setup_sidebars() {
@@ -50,6 +56,10 @@ function setup_sidebars() {
 
 function btn_sitelist_clicked() {
     leftbar.toggle();
+}
+
+function btn_legend_clicked() {
+    rightbar.toggle();
 }
 
 function process_loaded_sites(data) {

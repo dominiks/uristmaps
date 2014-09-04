@@ -88,7 +88,6 @@ def add_to_sites(sites, line):
     return False
 
 
-
 def num2deg(xtile, ytile):
     """ Transform the world coordinate into lat-lon coordinates that can
     be used as GeoJSON.
@@ -108,6 +107,7 @@ def num2deg(xtile, ytile):
     lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * ytile / n)))
     lat_deg = math.degrees(lat_rad)
     return (lon_deg, lat_deg)
+
 
 def export_sites(sites):
     """ Iterate over all sites and create a GeoJSON FeatureCollection.

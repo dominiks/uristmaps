@@ -18,7 +18,7 @@ region_dir = conf["Paths"]["region"]
 tiles_dir = conf["Paths"]["tiles"]
 tilesets_dir = conf["Paths"]["tilesets"]
 
-DOIT_CONFIG = {"default_tasks": ["dist_legends", "render_sat", "dist_index", "copy_res"]}
+DOIT_CONFIG = {"default_tasks": ["dist_legends", "render_sat", "dist_index", "biome_legend", "copy_res"]}
 
 def task_read_biome_info():
     """ Read biome info and write the biomes.json.
@@ -133,6 +133,16 @@ def task_copy_res():
     """
     return {
         "actions"   : [(copy_dir_contents, ("res", output_dir))],
+        "verbosity" : 2,
+    }
+
+
+def task_biome_legend():
+    """ Copy 32px images for biome rendering into the output dir.
+    """
+    return {
+        "actions"   : [(copy_dir, (pjoin(tiles_dir, "32"),
+                                   pjoin(output_dir, "biome_legend")))],
         "verbosity" : 2,
     }
 
