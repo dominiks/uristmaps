@@ -5,7 +5,7 @@ from os.path import join as pjoin
 from doit.tools import LongRunning
 
 from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder, tilesets, \
-                      load_structures, index, uristcopy
+                      load_structures, index, uristcopy, group_structures
 from uristmaps.config import conf
 
 
@@ -56,6 +56,7 @@ def task_create_index():
     }
 
 
+
 def task_dist_index():
     """ Copy the index.html from the build to output dir.
     """
@@ -74,7 +75,7 @@ def task_load_structures():
     """
 
     return {
-        "actions"   : [load_structures.load],
+        "actions"   : [load_structures.load, group_structures.make_groups],
         "verbosity" : 2,
         "targets"   : [pjoin(build_dir, "structs.json")],
         "file_dep"  : [filefinder.struct_map()]
