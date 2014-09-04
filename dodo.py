@@ -18,7 +18,7 @@ region_dir = conf["Paths"]["region"]
 tiles_dir = conf["Paths"]["tiles"]
 tilesets_dir = conf["Paths"]["tilesets"]
 
-DOIT_CONFIG = {"default_tasks": ["dist_legends", "render_sat", "dist_index", "biome_legend", "copy_res"]}
+DOIT_CONFIG = {"default_tasks": ["dist_sites", "render_sat", "dist_index", "biome_legend", "copy_res"]}
 
 def task_read_biome_info():
     """ Read biome info and write the biomes.json.
@@ -31,14 +31,14 @@ def task_read_biome_info():
         "file_dep"  : [filefinder.biome_map()]
         }
 
-def task_load_legends():
+def task_load_sites():
     """ Read the legends.xml and export the sites.json from that.
     """
 
     return {
-        "actions"   : [load_legends.load],
+        "actions"   : [load_legends.load_sites, load_legends.create_geojson],
         "verbosity" : 2,
-        "targets"   : [pjoin(build_dir, "sites.json")],
+        "targets"   : [pjoin(build_dir, "sites.json"),pjoin(build_dir, "sitesgeo.json")],
         "file_dep"  : [filefinder.legends_xml(),
                        pjoin(build_dir, "biomes.json")]
         }
@@ -106,16 +106,19 @@ def task_render_sat():
         }
 
 
-def task_dist_legends():
+def task_dist_sites():
     """ Copy the legends json into the output directory.
     """
 
     return {
         "actions"  : [(uristcopy.copy, (pjoin(build_dir, "sites.json"),
                               pjoin(output_dir, "js", "sites.json"))
+                     ),
+                      (uristcopy.copy, (pjoin(build_dir, "sitesgeo.json"),
+                              pjoin(output_dir, "js", "sitesgeo.json"))
                      )],
-        "file_dep" : [pjoin(build_dir, "sites.json")],
-        "targets"  : [pjoin(output_dir, "js", "sites.json")]
+        "file_dep" : [pjoin(build_dir, "sites.json"),pjoin(build_dir, "sitesgeo.json")],
+        "targets"  : [pjoin(output_dir, "js", "sites.json"),pjoin(output_dir, "js", "sitesgeo.json")]
     }
 
 

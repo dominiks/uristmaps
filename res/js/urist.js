@@ -22,7 +22,7 @@ function init_uristmaps() {
     }).addTo(map);
 
     // Load the sites json containing short info for every site
-    jQuery.getJSON("/js/sites.json", process_loaded_sites);
+    jQuery.getJSON("/js/sitesgeo.json", process_loaded_sites);
     
     setup_sidebars();
     init_buttons();
