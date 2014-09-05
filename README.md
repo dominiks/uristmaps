@@ -1,6 +1,8 @@
 Urist Maps
 ==========
 
+**See http://www.uristmaps.org/ for more information!**
+
 Renders a Google Maps like view of a Dwarf Fortress world using Leaflet.js.
 
 Quickstart
