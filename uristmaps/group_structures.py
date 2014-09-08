@@ -1,8 +1,10 @@
 """ Read the structures.json and and form groups of same typed structures.
 """
-import os, json, itertools
+import os, json, itertools, collections
 
 from uristmaps.config import conf
+
+build_dir = conf["Paths"]["build"]
 
 
 def make_groups():
@@ -96,8 +98,52 @@ def make_groups():
                 replace_grp(groups, right_below, this_grp)
                 del(group_defs[right_below])
 
-    print("Groups: {}".format(group_defs))
-    print("num: {}".format(len(group_defs)))
+    # Remove empty x-coordinates from the map
+    groups_final ={k:v for k,v in groups.items() if v}
+
+
+    result = {"groups": groups_final, "defs": group_defs}
+    with open(os.path.join(build_dir, "groups.json"), "w") as groupjs:
+        groupjs.write(json.dumps(result))
+
+
+def find_group_centers():
+    """ Write a json that maps {groupId -> x,y} to mark the center
+    coordinate of that group.
+    """
+    group_coords = collections.defaultdict(list)
+    with open(os.path.join(build_dir, "groups.json")) as groupjs:
+        groups = json.loads(groupjs.read())
+
+    for x in groups["groups"]:
+        for y in groups["groups"][x]:
+            group_coords[groups["groups"][x][y]].append((x,y))
+
+    print("Group_coords: {}".format(group_coords))
+
+    # Maps group -> (left, top, right, bottom)
+    group_minmax = {}
+    for group in group_coords:
+        for (x,y) in group_coords[group]:
+            if group not in group_coords:
+                group_coords[group] = [x,y,x,y]
+            else:
+                c = group_minmax[group]
+                group_minmax[group] = [min(x,c[0]), min(y, c[1]),
+                                       max(x,c[2]), max(y, c[3])]
+
+    group_centers = {}
+    for group in group_minmax:
+        c = group_minmax[group]
+        group_centers[group] = ((c[0] + c[2]) // 2,
+                                (c[1] + c[3]) // 2)
+
+    print("Centers: {}".format(group_centers))
+        
+
+def move():
+    
+    pass
 
 
 def replace_grp(groups, old, new):

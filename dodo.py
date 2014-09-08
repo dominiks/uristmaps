@@ -75,7 +75,8 @@ def task_load_structures():
     """
 
     return {
-        "actions"   : [load_structures.load, group_structures.make_groups],
+        "actions"   : [load_structures.load, group_structures.make_groups,
+                       group_structures.find_group_centers],
         "verbosity" : 2,
         "targets"   : [pjoin(build_dir, "structs.json")],
         "file_dep"  : [filefinder.struct_map()]
@@ -105,6 +106,12 @@ def task_render_sat():
                            "{}/structs.json".format(build_dir)],
             "targets"   : list_tile_files(pjoin(output_dir, "tiles"),i),
         }
+
+def task_correct_sites():
+    return {
+        "actions"   : [group_structures.move],
+        "file_dep" : [pjoin(build_dir, "groups.json")]
+    }
 
 
 def task_dist_sites():
