@@ -36,9 +36,9 @@ def task_load_sites():
     """
 
     return {
-        "actions"   : [load_legends.load_sites, load_legends.create_geojson],
+        "actions"   : [load_legends.load_sites],
         "verbosity" : 2,
-        "targets"   : [pjoin(build_dir, "sites.json"),pjoin(build_dir, "sitesgeo.json")],
+        "targets"   : [pjoin(build_dir, "sites.json")],
         "file_dep"  : [filefinder.legends_xml(),
                        pjoin(build_dir, "biomes.json")]
         }
@@ -75,12 +75,56 @@ def task_load_structures():
     """
 
     return {
-        "actions"   : [load_structures.load, group_structures.make_groups,
-                       group_structures.find_group_centers],
+        "actions"   : [load_structures.load],
         "verbosity" : 2,
         "targets"   : [pjoin(build_dir, "structs.json")],
         "file_dep"  : [filefinder.struct_map()]
         }
+
+
+def task_group_structures():
+    """ Read the structure info and find connected groups.
+    """
+    return {
+        "actions"   : [group_structures.make_groups],
+        "verbosity" : 2,
+        "targets"   : [pjoin(build_dir, "groups.json")],
+        "file_dep"  : [pjoin(build_dir, "structs.json")]
+    }
+
+def task_group_centers():
+    """ Read the structure groups and find a coordinate for the group's center.
+    """
+    return {
+        "actions"   : [group_structures.center_groups],
+        "verbosity" : 2,
+        "targets"   : [pjoin(build_dir, "group_centers.json")],
+        "file_dep"  : [pjoin(build_dir, "groups.json")]
+        }
+
+
+def task_center_sites():
+    """ Iterate over all groups and see if a site marker is close to
+    the group. Move the site marker to the center of this group.
+    """
+    return {
+       "actions"    : [group_structures.center_group_sites],
+       "verbosity"  : 2,
+       "file_dep"   : [pjoin(build_dir, "group_centers.json"),
+                       pjoin(build_dir, "sites.json")],
+    }
+
+
+def task_place_site_markers():
+    """ Calculate the map-coordinates for the sites.
+    """
+    return {
+        "actions"   : [load_legends.create_geojson],
+        "verbosity" : 2,
+        "file_dep"  : [pjoin(build_dir, "sites.json")],
+        "targets"   : [pjoin(build_dir, "sitesgeo.json")],
+        "task_dep"  : ["center_sites"]
+    }
 
 
 def task_render_sat():
@@ -106,12 +150,6 @@ def task_render_sat():
                            "{}/structs.json".format(build_dir)],
             "targets"   : list_tile_files(pjoin(output_dir, "tiles"),i),
         }
-
-def task_correct_sites():
-    return {
-        "actions"   : [group_structures.move],
-        "file_dep" : [pjoin(build_dir, "groups.json")]
-    }
 
 
 def task_dist_sites():

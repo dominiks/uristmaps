@@ -107,7 +107,7 @@ def make_groups():
         groupjs.write(json.dumps(result))
 
 
-def find_group_centers():
+def center_groups():
     """ Write a json that maps {groupId -> x,y} to mark the center
     coordinate of that group.
     """
@@ -119,18 +119,18 @@ def find_group_centers():
         for y in groups["groups"][x]:
             group_coords[groups["groups"][x][y]].append((x,y))
 
-    print("Group_coords: {}".format(group_coords))
+#    print("Group_coords: {}".format(group_coords))
 
     # Maps group -> (left, top, right, bottom)
     group_minmax = {}
     for group in group_coords:
         for (x,y) in group_coords[group]:
-            if group not in group_coords:
-                group_coords[group] = [x,y,x,y]
+            if group not in group_minmax:
+                group_minmax[group] = [int(x),int(y),int(x),int(y)]
             else:
                 c = group_minmax[group]
-                group_minmax[group] = [min(x,c[0]), min(y, c[1]),
-                                       max(x,c[2]), max(y, c[3])]
+                group_minmax[group] = [min(int(x),c[0]), min(int(y), c[1]),
+                                       max(int(x),c[2]), max(int(y), c[3])]
 
     group_centers = {}
     for group in group_minmax:
@@ -139,11 +139,39 @@ def find_group_centers():
                                 (c[1] + c[3]) // 2)
 
     print("Centers: {}".format(group_centers))
-        
+   
+    with open(os.path.join(build_dir, "group_centers.json"), "w") as sitesjs:
+        sitesjs.write(json.dumps(group_centers))
 
-def move():
+def center_group_sites():
+    with open(os.path.join(build_dir, "sites.json")) as sitesjs:
+        # Contains the info about sites markers
+        sites = json.loads(sitesjs.read())
     
-    pass
+    with open(os.path.join(build_dir, "group_centers.json")) as centersjs:
+        # Maps group ids to centered coordinates
+        centers = json.loads(centersjs.read())
+
+    with open(os.path.join(build_dir, "groups.json")) as groupsjs:
+        # Contains info about groups (type)
+        group_info = json.loads(groupsjs.read())
+
+    # Iterate over all groups (of types xyz) and find the closest maker of a fitting type.
+    # Move the marker to the group's center and store the id of that marker in a set
+    # to prevent moving the same marker multiple times.
+
+    # Contains the IDs of moved markers so they won't be moved again.
+    moved_markers = set()
+
+    for group_id in group_info["defs"]:
+        grp_type = group_info["defs"][group_id]
+
+        # Only handle these structure groups
+        if grp_type not in ["village"]:
+            continue
+
+        center_coords = centers[group_id]
+
 
 
 def replace_grp(groups, old, new):
