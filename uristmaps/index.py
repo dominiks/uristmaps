@@ -38,6 +38,8 @@ def create():
     ## Gather biome info for the legend
     tpl_context["biomes_legend"] = create_biomes_legend()
 
+    tpl_context["footer"] = conf.get("Output", "footer", fallback="")
+
     # Save the file to the build dir to finish
     with open(os.path.join(build_dir, "index.html"), "w") as index_file:
         index_file.write(index_tpl.render(tpl_context))
