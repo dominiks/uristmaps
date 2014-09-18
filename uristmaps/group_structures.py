@@ -8,10 +8,13 @@ build_dir = conf["Paths"]["build"]
 
 # Maps valid site types to structure types
 TYPE_TO_STRUCT = {
-    "hamlet"       : "village",
-    "dark fortress": "castle",
-    "hillocks"     : "village",
-    "town"         : "village"
+    "hamlet"         : "village",
+    "dark fortress"  : "castle",
+    "dark pits"      : "castle",
+    "tomb"           : "castle",
+    "hillocks"       : "village",
+    "town"           : "village",
+    "forest retreat" : "village",
 }
 
 
@@ -127,8 +130,6 @@ def center_groups():
         for y in groups["groups"][x]:
             group_coords[groups["groups"][x][y]].append((x,y))
 
-#    print("Group_coords: {}".format(group_coords))
-
     # Maps group -> (left, top, right, bottom)
     group_minmax = {}
     for group in group_coords:
@@ -178,7 +179,6 @@ def center_group_sites():
         radius = 0
         site_moved = False
         while True:
-            #print("Search radius: {}".format(radius))
             for group_id in find_groups(site["coords"], radius, group_info["groups"]):
                 group_id = str(group_id)
                 if group_id in visited_groups:
@@ -186,7 +186,6 @@ def center_group_sites():
                 if group_info["defs"][group_id] not in TYPE_TO_STRUCT[site["type"]]:
                     continue
                 # Move site marker and break loop
-                print("Moved {} to {} for grp_id {}".format(site["name"], centers[group_id], group_id))
                 site["coords"] = centers[group_id]
                 visited_groups.add(group_id)
                 site_moved = True
@@ -198,7 +197,6 @@ def center_group_sites():
                 break
             
 
-    print("Handled groups: {}".format(visited_groups))
     with open(os.path.join(build_dir, "sites.json"), "w") as sitesjs:
         sitesjs.write(json.dumps(sites))
 
@@ -208,7 +206,6 @@ def find_groups(coords, radius, groups):
     the coords.
     """
     result = []
-    #print("Searching {} around {}".format(radius, coords))
     for x in range(radius):
         try:
             result.append(groups[str(coords[0]-x)][str(coords[1]-(radius-x))])

@@ -93,7 +93,7 @@ def deflate_coords(x,y):
     """ Convert the coordinates from rough world coordinates to more
     exact world_tile coordinates.
     """
-    return int(x) * df_tilesize, int(y) * df_tilesize
+    return int(x) * df_tilesize + df_tilesize // 2, int(y) * df_tilesize + df_tilesize // 2
 
 
 def num2deg(xtile, ytile):
@@ -106,8 +106,8 @@ def num2deg(xtile, ytile):
     #      df world map (which uses 16 units big tiles)
     #   2. Move them by the offset along to get them into the centered world render
     #   3. Move them by half tile size to center them into this df world tile.
-    xtile = int(xtile) + offset + df_tilesize // 2
-    ytile = int(ytile) + offset + df_tilesize // 2
+    xtile = int(xtile) + offset
+    ytile = int(ytile) + offset
 
     # latlon magic from osm ( http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_numbers_to_lon..2Flat._2 )
     n = 2.0 ** zoom
@@ -124,8 +124,6 @@ def create_geojson():
 
     features = []
     for site in sites:
-        if site["name"] == "mindstyled":
-            print("Mindstyled @{}".format(site["coords"]))
         feature = {"type":"Feature",
                    "properties": {
                        "name": site["name"],
