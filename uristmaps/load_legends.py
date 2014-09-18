@@ -1,7 +1,6 @@
 import json, os, math, logging
 
 from clint.textui import progress
-from bs4 import BeautifulSoup
 
 from uristmaps.config import conf
 from uristmaps.filefinder import legends_xml
