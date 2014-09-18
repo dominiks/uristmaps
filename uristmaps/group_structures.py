@@ -6,6 +6,14 @@ from uristmaps.config import conf
 
 build_dir = conf["Paths"]["build"]
 
+# Maps valid site types to structure types
+TYPE_TO_STRUCT = {
+    "hamlet"       : "village",
+    "dark fortress": "castle",
+    "hillocks"     : "village",
+    "town"         : "village"
+}
+
 
 def make_groups():
     # load structures json into a map
@@ -138,8 +146,6 @@ def center_groups():
         group_centers[group] = ((c[0] + c[2]) // 2,
                                 (c[1] + c[3]) // 2)
 
-    print("Centers: {}".format(group_centers))
-   
     with open(os.path.join(build_dir, "group_centers.json"), "w") as sitesjs:
         sitesjs.write(json.dumps(group_centers))
 
@@ -156,22 +162,72 @@ def center_group_sites():
         # Contains info about groups (type)
         group_info = json.loads(groupsjs.read())
 
-    # Iterate over all groups (of types xyz) and find the closest maker of a fitting type.
-    # Move the marker to the group's center and store the id of that marker in a set
-    # to prevent moving the same marker multiple times.
+    # Iterate over all sites (skip those without structures)
+    # find the closest group that is not in the visited group set
+    # Move the site to the center coordinates
 
-    # Contains the IDs of moved markers so they won't be moved again.
-    moved_markers = set()
+    # Contains the IDs of groups that have received a marker
+    visited_groups = set()
 
-    for group_id in group_info["defs"]:
-        grp_type = group_info["defs"][group_id]
-
-        # Only handle these structure groups
-        if grp_type not in ["village"]:
+    for site in sites:
+        if site["type"] not in TYPE_TO_STRUCT:
+            #print("Skipping type: {}".format(site["type"]))
             continue
+        local_grps = []
 
-        center_coords = centers[group_id]
+        radius = 0
+        site_moved = False
+        while True:
+            #print("Search radius: {}".format(radius))
+            for group_id in find_groups(site["coords"], radius, group_info["groups"]):
+                group_id = str(group_id)
+                if group_id in visited_groups:
+                    continue
+                if group_info["defs"][group_id] not in TYPE_TO_STRUCT[site["type"]]:
+                    continue
+                # Move site marker and break loop
+                print("Moved {} to {} for grp_id {}".format(site["name"], centers[group_id], group_id))
+                site["coords"] = centers[group_id]
+                visited_groups.add(group_id)
+                site_moved = True
+                break
 
+            radius += 1
+            if radius >= 16 or site_moved:
+                #print("No group found for marker: {}".format(site))
+                break
+            
+
+    print("Handled groups: {}".format(visited_groups))
+    with open(os.path.join(build_dir, "sites.json"), "w") as sitesjs:
+        sitesjs.write(json.dumps(sites))
+
+
+def find_groups(coords, radius, groups):
+    """ Find the list of groups with the given radius around
+    the coords.
+    """
+    result = []
+    #print("Searching {} around {}".format(radius, coords))
+    for x in range(radius):
+        try:
+            result.append(groups[str(coords[0]-x)][str(coords[1]-(radius-x))])
+        except:
+            pass
+        try:
+            result.append(groups[str(coords[0]-x)][str(coords[1]+(radius-x))])
+        except:
+            pass
+        try:
+            result.append(groups[str(coords[0]+x)][str(coords[1]+(radius-x))])
+        except:
+            pass
+        try:
+            result.append(groups[str(coords[0]+x)][str(coords[1]-(radius-x))])
+        except:
+            pass
+    #print("Found {} groups.".format(len(result)))
+    return result
 
 
 def replace_grp(groups, old, new):

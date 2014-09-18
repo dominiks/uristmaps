@@ -124,6 +124,8 @@ def create_geojson():
 
     features = []
     for site in sites:
+        if site["name"] == "mindstyled":
+            print("Mindstyled @{}".format(site["coords"]))
         feature = {"type":"Feature",
                    "properties": {
                        "name": site["name"],
