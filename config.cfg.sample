@@ -5,7 +5,7 @@
 base_dir = ..
 
 # Where the exported files are stored
-region = %(base_dir)s/export_40_8
+region = %(base_dir)s/export
 
 # Where to place build files You don't really need to change this.
 build = %(base_dir)s/build
@@ -20,6 +20,8 @@ tiles = tiles
 tilesets = tilesets
 
 [Performance]
+# How many processes to use when rendering a map layer. I recommend you set this to the
+# amount of cores your cpu can use.
 processes = 8
 
 [Map]
