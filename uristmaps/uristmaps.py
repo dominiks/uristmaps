@@ -3,8 +3,11 @@
 of doit. This replicates the behaviour of doit but makes it easier accessible
 for cx_Freeze.
 """
+from multiprocessing import freeze_support
 
 def main():
+    # Fixes issues with multiprocessing with cx_freeze on windows
+    freeze_support()
     """ Start doit.
     """
     import sys
