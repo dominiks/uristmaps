@@ -13,14 +13,15 @@ def add_dir_recursive(dirname):
     return result
 
 build_exe_options = {"packages" : ["uristmaps", "doit"],
-                     "includes" : ["pkg_resources", "doit"],
                      "include_files" : ["dodo.py", "config.cfg.sample", ("win/host.bat", "host.bat"), ("win/generate_map.bat", "generate_map.bat")] + add_dir_recursive("templates") + add_dir_recursive("res") + add_dir_recursive("tiles"),
                      "compressed" : True
                     }
 
 base = None
-if sys.platform == "win32":
-    base = "Win32GUI"
+
+# Disabled this block as the app is not running as a UI app
+#if sys.platform == "win32":
+#    base = "Win32GUI"
 
 setup(name="UristMaps",
       version=uristmaps.__version__,
