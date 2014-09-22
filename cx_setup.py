@@ -14,7 +14,7 @@ def add_dir_recursive(dirname):
 
 build_exe_options = {"packages" : ["uristmaps", "doit"],
                      "includes" : ["pkg_resources", "doit"],
-                     "include_files" : ["dodo.py", ("win/host.bat", "host.bat"), ("win/generate_map.bat", "generate_map.bat")] + add_dir_recursive("templates") + add_dir_recursive("res") + add_dir_recursive("tiles"),
+                     "include_files" : ["dodo.py", "config.cfg.sample", ("win/host.bat", "host.bat"), ("win/generate_map.bat", "generate_map.bat")] + add_dir_recursive("templates") + add_dir_recursive("res") + add_dir_recursive("tiles"),
                      "compressed" : True
                     }
 
