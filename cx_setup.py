@@ -1,13 +1,20 @@
 #!/usr/bin/env python
-import sys
+import sys, os
 
 from cx_Freeze import setup, Executable
 
 import uristmaps
 
+def add_dir_recursive(dirname):
+    result = []
+    for root, dirnames, filenames in os.walk(dirname):
+        for filename in filenames:
+            result.append((os.path.join(root, filename), os.path.join(root, filename)))
+    return result
+
 build_exe_options = {"packages" : ["uristmaps", "doit"],
                      "includes" : ["pkg_resources", "doit"],
-                     "include_files" : ["dodo.py"],
+                     "include_files" : ["dodo.py"] + add_dir_recursive("templates") + add_dir_recursive("res"),
                      "compressed" : True
                     }
 
