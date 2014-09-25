@@ -18,7 +18,7 @@ region_dir = conf["Paths"]["region"]
 tiles_dir = conf["Paths"]["tiles"]
 tilesets_dir = conf["Paths"]["tilesets"]
 
-DOIT_CONFIG = {"default_tasks": ["dist_sites", "render_sat", "dist_index", "biome_legend", "copy_res"]}
+DOIT_CONFIG = {"default_tasks": ["create_tilesets", "dist_sites", "render_sat", "dist_index", "biome_legend", "copy_res"]}
 
 def task_read_biome_info():
     """ Read biome info and write the biomes.json.
