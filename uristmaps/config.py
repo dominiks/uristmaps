@@ -21,9 +21,6 @@ TODO: Delete the pidfile when done!
 
 try:
     conf_path = get_var("conf", "config.cfg")
-    # Save the conf path to the pid file
-    with open(".{}.txt".format(os.getpid()), "w") as pidfile:
-        pidfile.write(conf_path)
 except:
     # Reading conf path from pid file
     with open(".{}.txt".format(os.getppid())) as pidfile:

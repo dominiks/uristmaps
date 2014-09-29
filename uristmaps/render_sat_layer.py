@@ -8,7 +8,9 @@ from clint.textui import progress
 
 from PIL import Image
 
-from uristmaps import tilesets
+from doit import get_var
+
+from . import tilesets
 from uristmaps.config import conf
 
 
@@ -79,6 +81,10 @@ def render_layer(level):
     # Load the tilesheet
     TILES = tilesets.get_tileset(graphic_size)
 
+    # Save the path to the config file in a pid file for this process' children
+    with open(".{}.txt".format(os.getpid()), "w") as pidfile:
+        pidfile.write(get_var("conf", "config.cfg"))
+
     # Send the tile render jobs to the pool. Generates the parameters for each tile
     # with the get_tasks function.
     a = pool.imap_unordered(render_tile_mp, get_tasks(tile_amount, level, zoom_offset, biomes, structures, TILES), chunksize=chunk)
@@ -94,6 +100,10 @@ def render_layer(level):
 
     pool.close()
     pool.join()
+
+    # Remove the pidfile containing the config path
+    if os.path.exists(".{}.txt".format(os.getpid())):
+        os.remove(".{}.txt".format(os.getpid()))
 
 
 def get_tasks(tileamount, level, zoom_offset, biomes, structures, tiles):
