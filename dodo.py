@@ -28,7 +28,8 @@ def task_read_biome_info():
         "actions"   : [load_biomes.load],
         "targets"   : [pjoin(build_dir, "biomes.json")],
         "verbosity" : 2,
-        "file_dep"  : [filefinder.biome_map()]
+        "file_dep"  : [filefinder.biome_map()],
+        "clean"     : True,
         }
 
 def task_load_sites():
@@ -40,7 +41,8 @@ def task_load_sites():
         "verbosity" : 2,
         "targets"   : [pjoin(build_dir, "sites.json")],
         "file_dep"  : [filefinder.legends_xml(),
-                       pjoin(build_dir, "biomes.json")]
+                       pjoin(build_dir, "biomes.json")],
+        "clean"     : True,
         }
 
 
@@ -52,7 +54,8 @@ def task_create_index():
         "actions"   : [index.create],
         "verbosity" : 2,
         "targets"   : [pjoin(build_dir, "index.html")],
-        "file_dep"  : [] # Dunno yet
+        "file_dep"  : [], # Dunno yet
+        "clean"     : True,
     }
 
 
@@ -66,7 +69,7 @@ def task_dist_index():
                              pjoin(output_dir, "index.html")))],
         "verbosity" : 2,
         "targets" : [pjoin(output_dir, "index.html")],
-        "file_dep" : [pjoin(build_dir, "index.html")]
+        "file_dep" : [pjoin(build_dir, "index.html")],
         }
 
 
@@ -78,7 +81,8 @@ def task_load_structures():
         "actions"   : [load_structures.load],
         "verbosity" : 2,
         "targets"   : [pjoin(build_dir, "structs.json")],
-        "file_dep"  : [filefinder.struct_map()]
+        "file_dep"  : [filefinder.struct_map()],
+        "clean"     : True,
         }
 
 
@@ -89,7 +93,8 @@ def task_group_structures():
         "actions"   : [group_structures.make_groups],
         "verbosity" : 2,
         "targets"   : [pjoin(build_dir, "groups.json")],
-        "file_dep"  : [pjoin(build_dir, "structs.json")]
+        "file_dep"  : [pjoin(build_dir, "structs.json")],
+        "clean"     : True,
     }
 
 def task_group_centers():
@@ -99,7 +104,8 @@ def task_group_centers():
         "actions"   : [group_structures.center_groups],
         "verbosity" : 2,
         "targets"   : [pjoin(build_dir, "group_centers.json")],
-        "file_dep"  : [pjoin(build_dir, "groups.json")]
+        "file_dep"  : [pjoin(build_dir, "groups.json")],
+        "clean"     : True,
         }
 
 
@@ -112,6 +118,7 @@ def task_center_sites():
        "verbosity"  : 2,
        "file_dep"   : [pjoin(build_dir, "group_centers.json"),
                        pjoin(build_dir, "sites.json")],
+       "clean"     : True,
     }
 
 
@@ -123,7 +130,8 @@ def task_place_site_markers():
         "verbosity" : 2,
         "file_dep"  : [pjoin(build_dir, "sites.json")],
         "targets"   : [pjoin(build_dir, "sitesgeo.json")],
-        "task_dep"  : ["center_sites"]
+        "task_dep"  : ["center_sites"],
+        "clean"     : True,
     }
 
 
@@ -164,7 +172,7 @@ def task_dist_sites():
                               pjoin(output_dir, "js", "sitesgeo.json"))
                      )],
         "file_dep" : [pjoin(build_dir, "sites.json"),pjoin(build_dir, "sitesgeo.json")],
-        "targets"  : [pjoin(output_dir, "js", "sites.json"),pjoin(output_dir, "js", "sitesgeo.json")]
+        "targets"  : [pjoin(output_dir, "js", "sites.json"),pjoin(output_dir, "js", "sitesgeo.json")],
     }
 
 
@@ -183,6 +191,7 @@ def task_copy_res():
     return {
         "actions"   : [(uristcopy.copy_dir_contents, ("res", output_dir))],
         "verbosity" : 2,
+        "clean"     : True,
     }
 
 
@@ -193,6 +202,7 @@ def task_biome_legend():
         "actions"   : [(uristcopy.copy_dir, (pjoin(tiles_dir, "32"),
                                    pjoin(output_dir, "biome_legend")))],
         "verbosity" : 2,
+        "clean"     : True,
     }
 
 
