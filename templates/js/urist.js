@@ -17,8 +17,8 @@ function init_uristmaps() {
     map = L.map('map').setView([0, 0], 3);
     L.tileLayer('/tiles/{z}/{x}/{y}.png', {
         noWrap: true,
-        maxZoom: 7,
-        attribution: "<a href='http://www.uristmaps.org/'>UristMaps " + urist_version + "</a>",
+        maxZoom: {{ max_zoom }},
+        attribution: "<a href='http://www.uristmaps.org/'>UristMaps {{ version }}</a>",
     }).addTo(map);
 
     // Load the sites json containing short info for every site

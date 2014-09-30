@@ -11,7 +11,7 @@ build_dir = conf["Paths"]["build"]
 tile_dir = conf["Paths"]["tiles"]
 tile_output_dir = "biome_legend/"
 
-def create():
+def render_index():
     """ Create the index file and save it to the build dir.
     """
 
@@ -43,6 +43,28 @@ def create():
     # Save the file to the build dir to finish
     with open(os.path.join(build_dir, "index.html"), "w") as index_file:
         index_file.write(index_tpl.render(tpl_context))
+
+
+def render_uristjs():
+    """ Create the index file and save it to the build dir.
+    """
+
+    # Setup jinja env and load index template
+    env = Environment(loader=FileSystemLoader("templates"))
+    template = env.get_template("js/urist.js")
+
+    # Create template render context and insert version
+    tpl_context = {
+        "version"  : __version__,
+        "max_zoom" : conf.getint("Map", "max_zoom")
+    }
+
+    # Save the file to the build dir to finish
+    target_dir = os.path.join(build_dir, "js")
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
+    with open(os.path.join(target_dir, "urist.js"), "w") as index_file:
+        index_file.write(template.render(tpl_context))
 
 
 def create_biomes_legend():

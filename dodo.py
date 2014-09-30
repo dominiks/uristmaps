@@ -5,7 +5,7 @@ from os.path import join as pjoin
 from doit.tools import LongRunning
 
 from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder, tilesets, \
-                      load_structures, index, uristcopy, group_structures
+                      load_structures, templates, uristcopy, group_structures
 from uristmaps.config import conf
 
 
@@ -18,7 +18,7 @@ region_dir = conf["Paths"]["region"]
 tiles_dir = conf["Paths"]["tiles"]
 tilesets_dir = conf["Paths"]["tilesets"]
 
-DOIT_CONFIG = {"default_tasks": ["create_tilesets", "dist_sites", "render_sat", "dist_index", "biome_legend", "copy_res"]}
+DOIT_CONFIG = {"default_tasks": ["create_tilesets", "dist_sites", "render_sat", "index", "js_file", "biome_legend", "copy_res"]}
 
 def task_read_biome_info():
     """ Read biome info and write the biomes.json.
@@ -46,31 +46,49 @@ def task_load_sites():
         }
 
 
-def task_create_index():
-    """ Crate the index.html from the template and copy to build dir.
+def task_index():
+    """ Crate the index.html from the template and copy to the output dir.
     """
 
-    return {
-        "actions"   : [index.create],
+    yield {
+        "name"      : "compile",
+        "actions"   : [templates.render_index],
         "verbosity" : 2,
         "targets"   : [pjoin(build_dir, "index.html")],
-        "file_dep"  : [], # Dunno yet
+        "file_dep"  : [pjoin("templates", "index.html")],
         "clean"     : True,
     }
 
-
-
-def task_dist_index():
-    """ Copy the index.html from the build to output dir.
-    """
-
-    return {
+    yield {
+        "name"    : "dist",
         "actions" : [(uristcopy.copy, (pjoin(build_dir, "index.html"),
                              pjoin(output_dir, "index.html")))],
         "verbosity" : 2,
         "targets" : [pjoin(output_dir, "index.html")],
         "file_dep" : [pjoin(build_dir, "index.html")],
-        }
+    }
+
+def task_js_file():
+    """ Crate the urist.js from the template and copy to the output dir.
+    """
+
+    yield {
+        "name"      : "compile",
+        "actions"   : [templates.render_uristjs],
+        "verbosity" : 2,
+        "targets"   : [pjoin(build_dir, "js", "urist.js")],
+        "file_dep"  : [pjoin("templates", "js", "urist.js")],
+        "clean"     : True,
+    }
+
+    yield {
+        "name"    : "dist",
+        "actions" : [(uristcopy.copy, (pjoin(build_dir, "js", "urist.js"),
+                             pjoin(output_dir, "js", "urist.js")))],
+        "verbosity" : 2,
+        "targets" : [pjoin(output_dir, "js", "urist.js")],
+        "file_dep" : [pjoin(build_dir, "js", "urist.js")],
+    }
 
 
 def task_load_structures():
