@@ -187,6 +187,7 @@ def center_group_sites():
                     continue
                 # Move site marker and break loop
                 site["coords"] = centers[group_id]
+                site["coords_accurate"] = True
                 visited_groups.add(group_id)
                 site_moved = True
                 break

@@ -84,6 +84,7 @@ def add_to_sites(sites, line):
         return True
     if line.startswith("<coords>"):
         sites[-1]["coords"] = deflate_coords(*line[start:end].split(","))
+        sites[-1]["coords_accurate"] = False
         return True
     return False
 
@@ -123,6 +124,9 @@ def create_geojson():
 
     features = []
     for site in sites:
+        coords_text = site["coords"]
+        if not site["coords_accurate"]:
+            coords_text = "<i data-toggle='tooltip' title='Approximation'>*{}*</i>".format(site["coords"])
         feature = {"type":"Feature",
                    "properties": {
                        "name": site["name"],
@@ -134,7 +138,7 @@ def create_geojson():
                        Coords: {}
                        """.format(site["name"].title(),
                                site["type"].title(),
-                               site["coords"])
+                               coords_text)
                        },
                    "geometry": {
                        "type": "Point",
