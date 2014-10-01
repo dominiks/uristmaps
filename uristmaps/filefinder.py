@@ -30,6 +30,16 @@ def world_history():
     return None
 
 
+def sites_and_pops():
+    """ Find the sites and populations file
+    """
+    files = glob.glob(os.path.join(region_dir, "*-world_sites_and_pops.txt"))
+    if files:
+        return files[0]
+    raise IOError("Could not find sites and pops file in {}!".format(region_dir))
+    return None
+
+
 def legends_xml():
     """ Find the legends.xml file.
     """

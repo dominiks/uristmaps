@@ -14,6 +14,8 @@ offset = None
 zoom = None
 
 def load_sites():
+    """ Load the site information.
+    """
     global offset
     global coordinate_scale
     global zoom
@@ -118,7 +120,9 @@ def num2deg(xtile, ytile):
 
 
 def create_geojson():
-
+    """ Create the sitesgeo.json that the leaflet markers are created
+    from.
+    """
     with open(os.path.join(conf["Paths"]["build"], "sites.json")) as sitesjs:
         sites = json.loads(sitesjs.read())
 
