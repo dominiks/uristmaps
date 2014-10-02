@@ -13,13 +13,10 @@ offset = None
 # Minimum zoom level to fit all world coodinates in a rendered map using 1px big tiles.
 zoom = None
 
-def load_sites():
-    """ Load the site information.
-    """
-    global offset
-    global coordinate_scale
-    global zoom
 
+def calc_globals():
+    global offset
+    global zoom
     with open("{}/biomes.json".format(conf["Paths"]["build"])) as biomjs:
         biomes = json.loads(biomjs.read())
     worldsize = biomes["worldsize"]
@@ -31,6 +28,17 @@ def load_sites():
     mapsize = 2**zoom
     offset = (mapsize - worldsize) // 2
 
+
+def load_sites():
+    """ Load the site information.
+    """
+    global offset
+    global zoom
+
+    if offset is None:
+        calc_globals()
+
+    
     fname = legends_xml()
     logging.debug("Reading legends xml ({} Mb)".format(os.path.getsize(fname) // 1024 // 1024))
 
@@ -102,6 +110,11 @@ def num2deg(xtile, ytile):
     """ Transform the world coordinate into lat-lon coordinates that can
     be used as GeoJSON.
     """
+    global offset
+    global zoom
+
+    if offset is None:
+        calc_globals()
 
     # The world coordinates are transformed:
     #   1. Multiply by the size of a world tile to properly project them on the
@@ -123,6 +136,10 @@ def create_geojson():
     """ Create the sitesgeo.json that the leaflet markers are created
     from.
     """
+    from jinja2 import Environment, FileSystemLoader
+    env = Environment(loader=FileSystemLoader("templates"))
+    tooltip_template = env.get_template("_site_tooltip.html")
+
     with open(os.path.join(conf["Paths"]["build"], "sites.json")) as sitesjs:
         sites = json.loads(sitesjs.read())
 
@@ -137,13 +154,8 @@ def create_geojson():
                        "type": site["type"],
                        "id": site["id"],
                        "img": "/icons/{}.png".format(site["type"].replace(" ", "_")),
-                       "popupContent": """{}<br>
-                       Type: {}<br>
-                       Coords: {}
-                       """.format(site["name"].title(),
-                               site["type"].title(),
-                               coords_text)
-                       },
+                       "popupContent": tooltip_template.render({"site":site})
+                   },
                    "geometry": {
                        "type": "Point",
                        "coordinates": num2deg(*site["coords"])

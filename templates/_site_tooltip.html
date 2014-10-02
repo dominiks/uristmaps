@@ -1,0 +1,26 @@
+<h4>{{ site["name"] | title }} <small>{{ site["type"] | title }}</small></h4>
+
+{% if site["Owner"] %}
+Owner: {{ site["Owner"]}}<br />
+{% endif %}
+
+Coordinates:
+{% if site["coords_accurate"] %}
+{{ site["coords"] }}
+{% else %}
+<i title="These coordinates are an approximation" data-toggle="tooltip">
+    *{{ site["coords"] }}*
+</i>
+{% endif %}
+<br />
+
+Population info:<br />
+<table>
+    {# Apparently the sort direction does not work, it always sorts ascending. so reverse it #}
+{% for item in site["popinfo"] | dictsort(false, "value") | reverse%}
+<tr>
+    <td>&nbsp;&nbsp;{{ item[0] | title }}</td>
+    <td>: {{ item[1] }}</td>
+</tr>
+{% endfor %}
+</table>

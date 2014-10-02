@@ -200,7 +200,7 @@ def task_load_populations():
     """
     return {
         "actions"   : [load_pops.load_populations],
-        "file_dep"  : [filefinder.sites_and_pops()],
+        #"file_dep"  : [filefinder.sites_and_pops()],
         "task_dep"  : ["load_sites"],
         "verbosity" : 2
     }
