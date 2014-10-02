@@ -5,7 +5,8 @@ from os.path import join as pjoin
 from doit.tools import LongRunning
 
 from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder, tilesets, \
-                      load_structures, templates, uristcopy, group_structures
+                      load_structures, templates, uristcopy, group_structures, \
+                      load_pops
 from uristmaps.config import conf
 
 
@@ -18,7 +19,7 @@ region_dir = conf["Paths"]["region"]
 tiles_dir = conf["Paths"]["tiles"]
 tilesets_dir = conf["Paths"]["tilesets"]
 
-DOIT_CONFIG = {"default_tasks": ["create_tilesets", "dist_sites", "render_sat", "index", "js_file", "biome_legend", "copy_res"]}
+DOIT_CONFIG = {"default_tasks": ["create_tilesets", "load_populations", "dist_sites", "render_sat", "index", "js_file", "biome_legend", "copy_res"]}
 
 def task_read_biome_info():
     """ Read biome info and write the biomes.json.
@@ -191,6 +192,17 @@ def task_dist_sites():
                      )],
         "file_dep" : [pjoin(build_dir, "sites.json"),pjoin(build_dir, "sitesgeo.json")],
         "targets"  : [pjoin(output_dir, "js", "sites.json"),pjoin(output_dir, "js", "sitesgeo.json")],
+    }
+
+
+def task_load_populations():
+    """ Load the population counts and add them to the sites.js.
+    """
+    return {
+        "actions"   : [load_pops.load_populations],
+        "file_dep"  : [filefinder.sites_and_pops()],
+        "task_dep"  : ["load_sites"],
+        "verbosity" : 2
     }
 
 
