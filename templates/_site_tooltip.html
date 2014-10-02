@@ -8,13 +8,17 @@ Coordinates:
 {% if site["coords_accurate"] %}
 {{ site["coords"] }}
 {% else %}
+<u>
 <i title="These coordinates are an approximation" data-toggle="tooltip">
-    *{{ site["coords"] }}*
+    {{ site["coords"] }}
 </i>
+</u>
 {% endif %}
 <br />
 
-Population info:<br />
+{% if site["popinfo"] %}
+<hr />
+<h5>Population info</h5>
 <table>
     {# Apparently the sort direction does not work, it always sorts ascending. so reverse it #}
 {% for item in site["popinfo"] | dictsort(false, "value") | reverse%}
@@ -24,3 +28,4 @@ Population info:<br />
 </tr>
 {% endfor %}
 </table>
+{% endif %}
