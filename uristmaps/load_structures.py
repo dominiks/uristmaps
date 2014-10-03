@@ -2,8 +2,10 @@ import json, os, logging, itertools
 
 from PIL import Image
 
+from clint.textui import progress
+
 from uristmaps.config import conf
-from uristmaps.filefinder import struct_map
+from uristmaps import filefinder
 
 
 def same_type(structs, orig, other):
@@ -23,9 +25,6 @@ def same_type(structs, orig, other):
 
 
 def load():
-    orig = Image.open(struct_map())
-    logging.debug("Loaded world sized {0}x{0}".format(orig.size[0]))
-    pixels = orig.load()
 
     STRUCTS = {
         (128,128,128): "castle",
@@ -44,7 +43,6 @@ def load():
         (96,96,96)   : "stone_wall",
         (160,127,20) : "other_wall", 
         (0,96,255)   : "lake",
-        (0,192,255)  : "river",
 # The following are not really 'structures'
 #        (255,255,192): "mountain",
 #        (128,64,32)  : "land",# remove this? 
@@ -52,19 +50,41 @@ def load():
 #
     }
 
+    RIVERS = {
+        (0,224,255)  : "river",
+        (0,255,255)  : "river",
+        (0,112,255)  : "river",
+    }
+
     structs = {}
-    for (x,y) in itertools.product(range(orig.size[0]), repeat=2):
+
+    struct_image = Image.open(filefinder.struct_map())
+    struct_pixels = struct_image.load()
+    world_size = struct_image.size[0]
+    del(struct_image)
+    hydro_image = Image.open(filefinder.hydro_map())
+    hydro_pixels = hydro_image.load()
+    del(hydro_image)
+    for (x,y) in progress.dots(itertools.product(range(world_size), repeat=2), every=3000):
         try:
-            structs[(x,y)] = STRUCTS[pixels[(x,y)]]
+            structs[(x,y)] = STRUCTS[struct_pixels[(x,y)]]
         except KeyError:
             # We are not interested in this structure
             structs[(x,y)] = ""
+        # Check if there is a river
+        try:
+            river = RIVERS[hydro_pixels[(x,y)]]
+            if structs[(x,y)] != "" and structs[(x,y)] != "river":
+                #print("Overwriting {} with river.".format(structs[(x,y)]))
+                pass
+            structs[(x,y)] = "river"
+        except KeyError:
             pass
 
     final_tiles = {}
     # Now pass over all structures and see where tiles of the same type
     # neighbour each other
-    for (x,y) in itertools.product(range(orig.size[0]), repeat=2):
+    for (x,y) in progress.dots(itertools.product(range(world_size), repeat=2), every=3000):
         suffixes = ""
         if same_type(structs, (x,y), (0,-1)):
             suffixes += "n"
@@ -82,7 +102,7 @@ def load():
             except KeyError:
                 final_tiles[x] = {y : tile_type}
 
-    result = {"worldsize": orig.size[0],
+    result = {"worldsize": world_size,
               "map": final_tiles}
 
     build_dir = conf["Paths"]["build"]

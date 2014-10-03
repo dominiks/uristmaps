@@ -14,6 +14,14 @@ def biome_map():
     return load_map("bm")
 
 
+def hydro_map():
+    """ Convenience method to load the water map.
+    """
+    hmap =  load_map("hyd")
+    print("hyd_map: {}".format(hmap))
+    return hmap
+
+
 def struct_map():
     """ Convenience method to load the structures map.
     """
