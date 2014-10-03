@@ -16,8 +16,15 @@ Coordinates:
 {% endif %}
 <br />
 
+{% if site["detail_map"] %}
+<div>
+    <button class="btn btn-default btn-xs pull-right"
+            data-site="{{ site["id"] }}">Detail Map</button>
+</div>
+{% endif %}
+
 {% if site["popinfo"] %}
-<hr />
+<hr class="clearfix" style="margin-top: 1em;"/>
 <h5>Population info</h5>
 <table>
     {# Apparently the sort direction does not work, it always sorts ascending. so reverse it #}

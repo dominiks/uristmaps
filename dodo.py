@@ -147,7 +147,8 @@ def task_place_site_markers():
     return {
         "actions"   : [load_legends.create_geojson],
         "verbosity" : 2,
-        "file_dep"  : [pjoin(build_dir, "sites.json")],
+        "file_dep"  : [pjoin(build_dir, "sites.json"),
+                       pjoin(build_dir, "detailed_maps.json")],
         "targets"   : [pjoin(build_dir, "sitesgeo.json")],
         "task_dep"  : ["center_sites"],
         "clean"     : True,
@@ -195,8 +196,25 @@ def task_dist_sites():
     }
 
 
+def task_load_detailed_maps():
+    """ Check for detailed maps in the region directory and
+    send them to the output dir. Also writes the detailed_maps.json.
+    """
+    return {
+        "actions"   : [load_legends.load_detailed_maps],
+        #"file_dep"  : filefinder.all_site_maps(), TODO: All site maps in region dir
+        #"targets"   :                             TODO: All site maps in output dir
+        "targets"   : [pjoin(build_dir, "detailed_maps.json")],
+        "verbosity" : 2
+    }
+
+
+
 def task_load_populations():
     """ Load the population counts and add them to the sites.js.
+    TODO: Write the output of this into a separate file that is merged into the sitesgeo.json
+    to create your own target for this. (current target is sitesgeo.json but doit doesn't allow
+    this - for good reason).
     """
     return {
         "actions"   : [load_pops.load_populations],

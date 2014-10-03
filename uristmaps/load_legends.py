@@ -11,6 +11,8 @@ df_tilesize = 16
 offset = None
 
 # Minimum zoom level to fit all world coodinates in a rendered map using 1px big tiles.
+# This zoom level can be seen as the equivalent of 100% zoom where each coordinate
+# is 1px big.
 zoom = None
 
 
@@ -38,7 +40,6 @@ def load_sites():
     if offset is None:
         calc_globals()
 
-    
     fname = legends_xml()
     logging.debug("Reading legends xml ({} Mb)".format(os.path.getsize(fname) // 1024 // 1024))
 
@@ -62,6 +63,7 @@ def load_sites():
 
     with open("{}/sites.json".format(conf["Paths"]["build"]), "w") as sitesjson:
         sitesjson.write(json.dumps(sites))
+
 
 def add_to_sites(sites, line):
     """ Parse the current line add the information to the sites list.
@@ -116,11 +118,7 @@ def num2deg(xtile, ytile):
     if offset is None:
         calc_globals()
 
-    # The world coordinates are transformed:
-    #   1. Multiply by the size of a world tile to properly project them on the
-    #      df world map (which uses 16 units big tiles)
-    #   2. Move them by the offset along to get them into the centered world render
-    #   3. Move them by half tile size to center them into this df world tile.
+    # Move the coordinates by the offset along to get them into the centered world render
     xtile = int(xtile) + offset
     ytile = int(ytile) + offset
 
@@ -143,6 +141,8 @@ def create_geojson():
     with open(os.path.join(conf["Paths"]["build"], "sites.json")) as sitesjs:
         sites = json.loads(sitesjs.read())
 
+    # TODO: open the detailed_maps.json
+
     features = []
     for site in sites:
         coords_text = site["coords"]
@@ -154,16 +154,41 @@ def create_geojson():
                        "type": site["type"],
                        "id": site["id"],
                        "img": "/icons/{}.png".format(site["type"].replace(" ", "_")),
-                       "popupContent": tooltip_template.render({"site":site})
+                       "popupContent": tooltip_template.render({"site":site}),
                    },
                    "geometry": {
                        "type": "Point",
                        "coordinates": num2deg(*site["coords"])
                    }
         }
+
+        #feature.update(get_detailed_map(site))
+        # TODO: add info from detailed_maps map to the 
         features.append(feature)
 
     with open("{}/sitesgeo.json".format(conf["Paths"]["build"]), "w") as sitesjson:
         sitesjson.write(json.dumps({"type": "FeatureCollection",
                                     "features": features}))
+
+
+"""
+    if site["name"] == "daggertongue":
+        southwest = [site["coords"][1] + 17//2-1, site["coords"][0] - 17//2]
+        northeast = [site["coords"][1] - 17//2-1, site["coords"][0] + 17//2]
+        feature["properties"]["map_bounds"] = [num2deg(*southwest),
+                                               num2deg(*northeast)]
+        print("Coords: {}".format(feature["properties"]["map_bounds"]))"""
+
+
+def load_detailed_maps():
+    """ Convert the bmp in the region dir to the output dir as png.
+    And add them to the detailed_maps.json
+    """
+    # Iterate over all detailed map files, determine the size and site-id
+
+    # Save the id,dimesions and filename to the json
+    # export the image as png to the output dir
+    pass
+
+
 
