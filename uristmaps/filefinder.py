@@ -1,7 +1,7 @@
 """ Provide easy access to the latest versions of requested
 export-maps.
 """
-import os, glob
+import os, glob, re
 
 from uristmaps.config import conf
 
@@ -23,6 +23,20 @@ def hydro_map():
 def all_site_maps():
     return glob.glob(os.path.join(region_dir, "*site_map*.bmp"))
 
+
+def all_site_maps_target():
+    """ Determine the filenames for all detailed site maps
+    as they would appear in the output directory.
+    """
+    output_dir = conf.get("Paths", "output")
+    id_re = re.compile("(\d+).bmp")
+    result = []
+    for site_map in all_site_maps():
+        filename = os.path.basename(site_map)
+        site_id = id_re.findall(filename)[0]
+        result.append(os.path.join(output_dir, "{}.png".format(site_id)))
+        
+    return result
 
 def struct_map():
     """ Convenience method to load the structures map.
