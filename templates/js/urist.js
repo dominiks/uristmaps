@@ -20,6 +20,7 @@ function init_uristmaps() {
         maxZoom: {{ max_zoom }},
         attribution: "<a href='http://www.uristmaps.org/'>UristMaps {{ version }}</a>",
     }).addTo(map);
+    window.map = map;
 
     var imageUrl = "http://localhost:8000/sites/region2-00250-01-01-site_map-90.png",
     imageBounds = [[55,-50],[60,-60]];
@@ -66,12 +67,41 @@ function btn_legend_clicked() {
     rightbar.toggle();
 }
 
+/**
+ * Event handler for onclick of toggle detail map button in
+ * sites' tooltip.
+ */
+function toggle_detailed_map(site_id) {
+    var overlay = window.active_site_maps[site_id];
+
+    // When the overlay was active, remove it
+    if (overlay != undefined) {
+        window.map.removeLayer(overlay);
+        window.active_site_maps[site_id] = null;
+    } else {
+        // Create the overlay and add it to active_site_maps
+        var image_url = "/sites/" + site_id + ".png";
+
+        // the .features object is a list in which the index is resolved as id-1
+        var image_bounds = window.sites_geojson.features[site_id-1].properties.map_bounds;
+        var overlay = L.imageOverlay(image_url, image_bounds);
+        window.active_site_maps[site_id] = overlay;
+        overlay.addTo(window.map);
+    }
+}
+
+/**
+ * When the sites json is loaded, create the cluster group for 
+ * all site markers.
+ */
 function process_loaded_sites(data) {
     sites_geojson = data;
+    window.sites_geojson = data;
+    window.active_site_maps = {};
   
     // Create a cluster group to better show the site icons
     var clusters = new L.MarkerClusterGroup({
-    maxClusterRadius: 30
+        maxClusterRadius: 30
     });
 
     // Convert geojson info to clustered markers

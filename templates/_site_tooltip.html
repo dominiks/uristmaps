@@ -16,9 +16,10 @@ Coordinates:
 {% endif %}
 <br />
 
-{% if site["detail_map"] %}
+{% if detailed_maps[site["id"]] %}
 <div>
-    <button class="btn btn-default btn-xs pull-right"
+    <button class="btn btn-default btn-xs pull-right btn-detail-map"
+        onclick="toggle_detailed_map({{ site["id"] }})"
             data-site="{{ site["id"] }}">Detail Map</button>
 </div>
 {% endif %}
@@ -31,7 +32,7 @@ Coordinates:
 {% for item in site["popinfo"] | dictsort(false, "value") | reverse%}
 <tr>
     <td>&nbsp;&nbsp;{{ item[0] | title }}</td>
-    <td>: {{ item[1] }}</td>
+    <td class="text-right">: {{ item[1] }}</td>
 </tr>
 {% endfor %}
 </table>

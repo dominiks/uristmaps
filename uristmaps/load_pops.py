@@ -13,7 +13,7 @@ def load_populations():
     fname = sites_and_pops()
 
     # Regexpatterns
-    id_find = re.compile("(\d\d*):")
+    id_find = re.compile("(\d+):")
     current_site = None
 
     popinfo = {}

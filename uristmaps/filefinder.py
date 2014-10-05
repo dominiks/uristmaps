@@ -17,9 +17,11 @@ def biome_map():
 def hydro_map():
     """ Convenience method to load the water map.
     """
-    hmap =  load_map("hyd")
-    print("hyd_map: {}".format(hmap))
-    return hmap
+    return load_map("hyd")
+
+
+def all_site_maps():
+    return glob.glob(os.path.join(region_dir, "*site_map*.bmp"))
 
 
 def struct_map():

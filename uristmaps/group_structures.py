@@ -2,6 +2,8 @@
 """
 import os, json, itertools, collections
 
+from clint.textui import progress
+
 from uristmaps.config import conf
 
 build_dir = conf["Paths"]["build"]
@@ -38,7 +40,7 @@ def make_groups():
     blacklist = ["river", "meadow", "crops", "orchard", "pasture"]
 
     # first step is to grow groups on the map
-    for (x,y) in itertools.product(range(world_size), repeat=2):
+    for (x,y) in progress.dots(itertools.product(range(world_size), repeat=2), every=20000):
         this_type = get_type(structures["map"], x, y)
 
         # Skip this tile when there's no structure
@@ -77,7 +79,7 @@ def make_groups():
 
     # second step is to go over them and merge neighbouring groups
     # of the same type
-    for (x,y) in itertools.product(range(world_size), repeat=2):
+    for (x,y) in progress.dots(itertools.product(range(world_size), repeat=2), every=20000):
         this_grp = get_grp(groups, x, y)
 
         # skip non-groups

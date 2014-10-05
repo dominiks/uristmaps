@@ -65,7 +65,7 @@ def load():
     hydro_image = Image.open(filefinder.hydro_map())
     hydro_pixels = hydro_image.load()
     del(hydro_image)
-    for (x,y) in progress.dots(itertools.product(range(world_size), repeat=2), every=3000):
+    for (x,y) in progress.dots(itertools.product(range(world_size), repeat=2), every=20000):
         try:
             structs[(x,y)] = STRUCTS[struct_pixels[(x,y)]]
         except KeyError:
@@ -84,7 +84,7 @@ def load():
     final_tiles = {}
     # Now pass over all structures and see where tiles of the same type
     # neighbour each other
-    for (x,y) in progress.dots(itertools.product(range(world_size), repeat=2), every=3000):
+    for (x,y) in progress.dots(itertools.product(range(world_size), repeat=2), every=20000):
         suffixes = ""
         if same_type(structs, (x,y), (0,-1)):
             suffixes += "n"

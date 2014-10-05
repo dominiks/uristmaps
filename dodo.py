@@ -202,7 +202,7 @@ def task_load_detailed_maps():
     """
     return {
         "actions"   : [load_legends.load_detailed_maps],
-        #"file_dep"  : filefinder.all_site_maps(), TODO: All site maps in region dir
+        "file_dep"  : filefinder.all_site_maps(),
         #"targets"   :                             TODO: All site maps in output dir
         "targets"   : [pjoin(build_dir, "detailed_maps.json")],
         "verbosity" : 2
