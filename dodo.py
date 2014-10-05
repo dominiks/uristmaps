@@ -78,7 +78,7 @@ def task_js_file():
         "actions"   : [templates.render_uristjs],
         "verbosity" : 2,
         "targets"   : [pjoin(build_dir, "js", "urist.js")],
-        "file_dep"  : [pjoin("templates", "js", "urist.js")],
+        #"file_dep"  : [pjoin("templates", "js", "urist.js")],
         "clean"     : True,
     }
 
