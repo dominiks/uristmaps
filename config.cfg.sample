@@ -28,6 +28,9 @@ processes = 8
 # The number of the highest zoom level to render.
 max_zoom = 7
 
+# Hide spoilery content
+show_spoilers = no
+
 [Output]
 # Use this to inject html into the resulting index.html. For example for user tracking.
 footer = ""
