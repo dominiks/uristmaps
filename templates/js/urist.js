@@ -22,10 +22,6 @@ function init_uristmaps() {
     }).addTo(map);
     window.map = map;
 
-    var imageUrl = "http://localhost:8000/sites/region2-00250-01-01-site_map-90.png",
-    imageBounds = [[55,-50],[60,-60]];
-    L.imageOverlay(imageUrl, imageBounds).addTo(map);
-
     // Load the sites json containing short info for every site
     jQuery.getJSON("/js/sitesgeo.json", process_loaded_sites);
     
