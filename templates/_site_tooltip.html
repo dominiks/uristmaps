@@ -32,7 +32,8 @@ Coordinates:
 {% for item in site["popinfo"] | dictsort(false, "value") | reverse%}
 <tr>
     <td>&nbsp;&nbsp;{{ item[0] | title }}</td>
-    <td class="text-right">: {{ item[1] }}</td>
+    <td>:</td>
+    <td class="text-right">{{ item[1] }}</td>
 </tr>
 {% endfor %}
 </table>
