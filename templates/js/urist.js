@@ -79,10 +79,16 @@ function toggle_detailed_map(site_id) {
         var image_url = "/sites/" + site_id + ".png";
 
         // the .features object is a list in which the index is resolved as id-1
-        var image_bounds = window.sites_geojson.features[site_id-1].properties.map_bounds;
-        var overlay = L.imageOverlay(image_url, image_bounds);
-        window.active_site_maps[site_id] = overlay;
-        overlay.addTo(window.map);
+        for (var i = 0; i < window.sites_geojson.features.length; i++) {
+            var site = window.sites_geojson.features[i];
+            if (site.properties.id != site_id) {
+                continue;
+            }
+            var overlay = L.imageOverlay(image_url, site.properties.map_bounds);
+            window.active_site_maps[site_id] = overlay;
+            overlay.addTo(window.map);
+            break;
+        }
     }
 }
 
