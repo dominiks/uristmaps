@@ -89,6 +89,6 @@ def get_world_name():
     """ Find the name of the world.
     First line in world_history.txt is the dwarfen name, second line is translated
     """
-    with open(world_history()) as hist_file:
+    with open(world_history(), encoding="latin1") as hist_file:
         return  "{} - {}".format(hist_file.readline().strip(), hist_file.readline().strip())
 
