@@ -17,7 +17,7 @@ def load_populations():
     current_site = None
 
     popinfo = {}
-    with open(fname, "r") as popsfile:
+    with open(fname, encoding="latin1") as popsfile:
         #for line in progress.dots(popsfile, every=100):
         for line in popsfile:
             if line.startswith("Outdoor"):
