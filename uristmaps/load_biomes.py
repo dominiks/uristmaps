@@ -13,8 +13,8 @@ def load():
     BIOMES = {
         (128,128,128): "mountain",
         (0,224,255): "temperate_freshwater_lake",
-        (0,192,255): "temperate brackish_lake",
-        (0,160,255): "temperate saltwater_lake",
+        (0,192,255): "temperate_brackish_lake",
+        (0,160,255): "temperate_saltwater_lake",
         (0,96,255): "tropical_freshwater_lake",
         (0,64,255): "tropical_brackish_lake", 
         (0,32,255): "tropical_saltwater_lake", 
