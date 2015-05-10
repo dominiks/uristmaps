@@ -49,7 +49,7 @@ def load_sites():
 
     sites = []
     sites_started = False
-    with open(fname, "r") as xmlfile:
+    with open(fname, "r", encoding="iso-8859-1") as xmlfile:
         for line in progress.dots(xmlfile, every=1000):
             if not sites_started:
                 if line.startswith("<sites>"):
@@ -209,7 +209,12 @@ def load_detailed_maps():
     # Save the id,dimesions and filename to the json
     # export the image as png to the output dir
     maps = {}
-    for img_file in progress.bar(filefinder.all_site_maps()):
+    site_maps = filefinder.all_site_maps()
+
+    if not site_maps:
+        return
+
+    for img_file in progress.bar(site_maps):
         site_id = id_finder.findall(img_file)
         if not site_id:
             # For some reason there was no id to find?
