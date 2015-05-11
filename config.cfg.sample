@@ -7,6 +7,9 @@ base_dir = .
 # Where the exported files are stored
 region = %(base_dir)s/export
 
+# The name of the region. Exported files start with this name.
+region_name = region1
+
 # Where to place build files You don't really need to change this.
 build = %(base_dir)s/build
 

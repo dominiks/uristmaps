@@ -6,6 +6,7 @@ import os, glob, re
 from uristmaps.config import conf
 
 region_dir = conf["Paths"]["region"]
+region_name = conf["Paths"]["region_name"]
 
 
 def biome_map():
@@ -21,7 +22,7 @@ def hydro_map():
 
 
 def all_site_maps():
-    return glob.glob(os.path.join(region_dir, "*site_map*.bmp"))
+    return glob.glob(os.path.join(region_dir, region_name + "*site_map*.bmp"))
 
 
 def all_site_maps_target():
@@ -45,7 +46,7 @@ def struct_map():
 
 
 def world_history():
-    files = glob.glob(region_dir + "/*-world_history.txt")
+    files = glob.glob(region_dir + "/" + region_name + "*-world_history.txt")
 
     if files:
         return files[0]
@@ -57,7 +58,7 @@ def world_history():
 def sites_and_pops():
     """ Find the sites and populations file
     """
-    files = glob.glob(os.path.join(region_dir, "*-world_sites_and_pops.txt"))
+    files = glob.glob(os.path.join(region_dir, region_name + "*-world_sites_and_pops.txt"))
     if files:
         return files[0]
     raise IOError("Could not find sites and pops file in {}!".format(region_dir))
@@ -67,7 +68,7 @@ def sites_and_pops():
 def legends_xml():
     """ Find the legends.xml file.
     """
-    files = glob.glob(region_dir + "/*-legends.xml")
+    files = glob.glob(region_dir + "/" + region_name + "*-legends.xml")
 
     if files:
         return files[0]
@@ -84,10 +85,10 @@ def load_map(key):
 
     Returns the path to the exported map or None when no export could be found.
     """
-    files = glob.glob(region_dir + "/*-{}.bmp".format(key))
+    files = glob.glob(region_dir + "/" + region_name + "*-{}.bmp".format(key))
 
     if not files:
-        files = glob.glob(region_dir + "/*-{}-*.bmp".format(key))
+        files = glob.glob(region_dir + "/" + region_name + "*-{}-*.bmp".format(key))
 
     if files:
         return files[0]
