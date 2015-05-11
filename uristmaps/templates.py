@@ -56,7 +56,8 @@ def render_uristjs():
     # Create template render context and insert version
     tpl_context = {
         "version"  : __version__,
-        "max_zoom" : conf.getint("Map", "max_zoom")
+        "max_zoom" : conf.getint("Map", "max_zoom"),
+        "max_cluster_radius" : conf.getint("Map", "max_cluster_radius")
     }
 
     # Save the file to the build dir to finish

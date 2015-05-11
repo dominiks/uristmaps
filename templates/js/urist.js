@@ -103,7 +103,7 @@ function process_loaded_sites(data) {
   
     // Create a cluster group to better show the site icons
     var clusters = new L.MarkerClusterGroup({
-        maxClusterRadius: 30
+        maxClusterRadius: {{ max_cluster_radius }}
     });
 
     // Convert geojson info to clustered markers
