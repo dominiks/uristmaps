@@ -13,7 +13,7 @@ setup(name="UristMaps",
       install_requires=["pillow",         # Image processing
                         "clint",          # Pretty cli output
                         "doit",           # Quick management of tasks and execution order
-                        "jinja2",          # Rendering html files
+                        "Jinja2",          # Rendering html files
      ]
 )
 
