@@ -22,7 +22,7 @@ def hydro_map():
 
 
 def all_site_maps():
-    return glob.glob(os.path.join(region_dir, region_name + "*site_map*.bmp"))
+    return glob.glob(os.path.join(region_dir, region_name + "*site_map*.png"))
 
 
 def all_site_maps_target():
@@ -30,7 +30,7 @@ def all_site_maps_target():
     as they would appear in the output directory.
     """
     output_dir = conf.get("Paths", "output")
-    id_re = re.compile("(\d+).bmp")
+    id_re = re.compile("(\d+).png")
     result = []
     for site_map in all_site_maps():
         filename = os.path.basename(site_map)
@@ -85,10 +85,10 @@ def load_map(key):
 
     Returns the path to the exported map or None when no export could be found.
     """
-    files = glob.glob(region_dir + "/" + region_name + "*-{}.bmp".format(key))
+    files = glob.glob(region_dir + "/" + region_name + "*-{}.png".format(key))
 
     if not files:
-        files = glob.glob(region_dir + "/" + region_name + "*-{}-*.bmp".format(key))
+        files = glob.glob(region_dir + "/" + region_name + "*-{}-*.png".format(key))
 
     if files:
         return files[0]

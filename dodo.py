@@ -6,7 +6,7 @@ from doit.tools import LongRunning
 
 from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder, tilesets, \
                       load_structures, templates, uristcopy, group_structures, \
-                      load_pops
+                      load_pops, imgconvert
 from uristmaps.config import conf
 
 
@@ -19,7 +19,7 @@ region_dir = conf["Paths"]["region"]
 tiles_dir = conf["Paths"]["tiles"]
 tilesets_dir = conf["Paths"]["tilesets"]
 
-DOIT_CONFIG = {"default_tasks": ["create_tilesets", "load_populations", "dist_sites", "render_sat", "index", "js_file", "biome_legend", "copy_res"]}
+DOIT_CONFIG = {"default_tasks": ["create_tilesets", "convert_bmp", "load_populations", "dist_sites", "render_sat", "index", "js_file", "biome_legend", "copy_res"]}
 
 def task_read_biome_info():
     """ Read biome info and write the biomes.json.
@@ -239,6 +239,14 @@ def task_copy_res():
         "actions"   : [(uristcopy.copy_dir_contents, ("res", output_dir))],
         "verbosity" : 2,
         "clean"     : True,
+    }
+
+def task_convert_bmp():
+    """ Convert all bmp files to png and delete the bmp.
+    """
+    return {
+        "actions" : [imgconvert.convert_bitmaps],
+        "verbosity" : 2
     }
 
 
