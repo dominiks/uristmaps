@@ -9,16 +9,16 @@ region_dir = conf["Paths"]["region"]
 region_name = conf["Paths"]["region_name"]
 
 
-def biome_map():
+def biome_map(fail=True):
     """ Convenience method to load the biome map.
     """
-    return load_map("bm")
+    return load_map("bm", fail)
 
 
-def hydro_map():
+def hydro_map(fail=True):
     """ Convenience method to load the water map.
     """
-    return load_map("hyd")
+    return load_map("hyd", fail)
 
 
 def all_site_maps():
@@ -39,13 +39,13 @@ def all_site_maps_target():
         
     return result
 
-def struct_map():
+def struct_map(fail=True):
     """ Convenience method to load the structures map.
     """
-    return load_map("str")
+    return load_map("str", fail)
 
 
-def world_history():
+def world_history(fail=True):
     files = glob.glob(region_dir + "/" + region_name + "*-world_history.txt")
 
     if files:
@@ -55,7 +55,7 @@ def world_history():
     return None
 
 
-def sites_and_pops():
+def sites_and_pops(fail=True):
     """ Find the sites and populations file
     """
     files = glob.glob(os.path.join(region_dir, region_name + "*-world_sites_and_pops.txt"))
@@ -65,7 +65,7 @@ def sites_and_pops():
     return None
 
 
-def legends_xml():
+def legends_xml(fail=True):
     """ Find the legends.xml file.
     """
     files = glob.glob(region_dir + "/" + region_name + "*-legends.xml")
@@ -77,13 +77,12 @@ def legends_xml():
     return None
     
 
-def load_map(key):
+def load_map(key, fail=True):
     """ Search for a map export in the region dir by its keyand return the
     file's path.
 
-    Supports old and new style named export.
-
     Returns the path to the exported map or None when no export could be found.
+    When fail is true, an exception will be thrown if the file could not be found.
     """
     files = glob.glob(region_dir + "/" + region_name + "*-{}.png".format(key))
 
@@ -93,6 +92,8 @@ def load_map(key):
     if files:
         return files[0]
 
-    raise IOError("Could not find map export '{}' in {}!".format(key, region_dir))
-    return None
+    if fail:
+        raise IOError("Could not find map export '{}' in {}!".format(key, region_dir))
+
+    return ""
 

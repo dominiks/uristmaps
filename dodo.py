@@ -29,7 +29,7 @@ def task_read_biome_info():
         "actions"   : [load_biomes.load],
         "targets"   : [pjoin(build_dir, "biomes.json")],
         "verbosity" : 2,
-        "file_dep"  : [filefinder.biome_map()],
+        "file_dep"  : [filefinder.biome_map(fail=False)],
         "clean"     : True,
         }
 
@@ -41,7 +41,7 @@ def task_load_sites():
         "actions"   : [load_legends.load_sites],
         "verbosity" : 2,
         "targets"   : [pjoin(build_dir, "sites.json")],
-        "file_dep"  : [filefinder.legends_xml(),
+        "file_dep"  : [filefinder.legends_xml(fail=False),
                        pjoin(build_dir, "biomes.json")],
         "clean"     : True,
         }
@@ -100,7 +100,7 @@ def task_load_structures():
         "actions"   : [load_structures.load],
         "verbosity" : 2,
         "targets"   : [pjoin(build_dir, "structs.json")],
-        "file_dep"  : [filefinder.struct_map()],
+        "file_dep"  : [filefinder.struct_map(fail=False)],
         "clean"     : True,
         }
 
