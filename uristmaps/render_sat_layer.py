@@ -36,18 +36,18 @@ def render_layer(level):
     """
     biomes = load_biomes_map()
     structures = load_structures_map()
-    
+
     # The rendersettings
     settings = {"level" : level, # The zoom level to render
                 "biomes" : load_biomes_map(), # The biome information
                 "structures": load_structures_map(), # The structures information
                 "tile_amount" : int(math.pow(2, level)) # How many tiles the renderjob is wide (or high)
     }
-    
+
     # Determine wich will be the first zoom level to use graphic tiles
     # bigger than 1px:
     zoom_offset = 0
-    
+
     # One rendered tile has a side length of 256px. The smallest zoom
     # uses only 1 tile.
     mapsize = 256 
@@ -61,13 +61,13 @@ def render_layer(level):
 
     # The size of the tileset images to use for rendering.
     graphic_size = int(math.pow(2, level - zoom_offset))
-    
-    stepsize = 1
+
+    settings["stepsize"] = 1
     # The world would not fit into this layer, even if the used tiles were only 1px big.
     if graphic_size == 0:
         # We'll render only every second, or fourth etc. world coordinate
-        stepsize = math.pow(2, zoom_offset - level)
-        return
+        settings["stepsize"] = int(math.pow(2, zoom_offset - level))
+        graphic_size = 1
     settings["graphic_size"] = graphic_size
 
     # Load the tilesheet
@@ -85,7 +85,7 @@ def render_layer(level):
     # Limiting the chunksize helps getting more frequent updates for the progress bar
     # This slows the operation a bit down, though (about 1.5sek for zoom lvl 6...)
     chunk = min(chunk, 2048)
-    
+
     # Have maximum as many processes as there are chunks so we don't have more
     # processes than there is work available.
     process_count = min(process_count, chunk)
@@ -144,7 +144,7 @@ def render_tile_mp(opts):
 def render_tile(tile_x, tile_y, settings):
     """ Render the world map tile with the given indeces at the provided level.
     """
-    worldsize = settings["biomes"]["worldsize"] # Convenience shortname
+    worldsize = settings["biomes"]["worldsize"] / settings["stepsize"] # Convenience shortname
     image = Image.new("RGBA", (256, 256), "white")
 
     # The size of graphic-tiles that will be used for rendering
@@ -152,34 +152,43 @@ def render_tile(tile_x, tile_y, settings):
 
     # Calculate the size of the rendered world in tiles
     render_size = 256 * math.pow(2, settings["level"])
-    
+
     tiles = settings["tiles"]
     biomes = settings["biomes"]
     structures = settings["structures"]
 
     # How many render tiles are kept clear left and top to center the world render
-    clear_tiles = 256 * math.pow(2, settings["zoom_offset"]) - worldsize
+    clear_tiles = 256 * math.pow(2, settings["zoom_offset"]) - settings["biomes"]["worldsize"]
+    clear_tiles //= settings["stepsize"]
     clear_tiles //= 2 # Half it to get the offset left and top of the world.
 
     tiles_per_block = 256 // graphic_size
 
     for render_tile_x in range(tiles_per_block):
+        # The global x coordinate of this rendered graphics tile in the render output
         global_tile_x = render_tile_x + tile_x * tiles_per_block
+
+        # Skip this tile when it comes before anything should be visible
         if global_tile_x < clear_tiles:
             continue
-        if global_tile_x >= biomes["worldsize"] + clear_tiles:
+        # And stop this whole row if nothing comes after
+        if global_tile_x >= biomes["worldsize"] / settings["stepsize"] + clear_tiles:
             break
 
         for render_tile_y in range(tiles_per_block):
+            # The global y coordinate for this rendered graphics tile in the render output
             global_tile_y = render_tile_y + tile_y * tiles_per_block
+
+            # Skip this tile when it comes before anything should be visible
             if global_tile_y < clear_tiles:
                 continue
-            if global_tile_y >= biomes["worldsize"] + clear_tiles:
+            # Stop this column if nothing will be visible
+            if global_tile_y >= biomes["worldsize"] / settings["stepsize"] + clear_tiles:
                 break
 
-            world_x = int(global_tile_x - clear_tiles)
-            world_y = int(global_tile_y - clear_tiles)
-            
+            world_x = int(global_tile_x - clear_tiles) * settings["stepsize"]
+            world_y = int(global_tile_y - clear_tiles) * settings["stepsize"]
+
             location = (render_tile_x * graphic_size, render_tile_y * graphic_size)
 
             # Render biome
@@ -195,7 +204,8 @@ def render_tile(tile_x, tile_y, settings):
                     struct = tiles[struct_name]
                     image.paste(struct, location, struct)
                 except:
-                    log.warning("Could not render image: {}".format(struct_name))
+                    #print("Could not render image: {}".format(struct_name))
+                    pass
             except:
                 # No structure found
                 pass
@@ -206,8 +216,3 @@ def render_tile(tile_x, tile_y, settings):
 
     fname = "{}/tiles/{}/{}/{}.png".format(paths["output"], settings["level"], tile_x, tile_y)
     image.save(fname)
-
-
-if __name__ == "__main__":
-    render_layer(5)
-
