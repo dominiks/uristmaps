@@ -10,8 +10,6 @@ from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder, t
 from uristmaps.config import conf
 
 
-# TODO: Replace cmd calls with direct python calls for better platform independence
-
 # Some convenient references to configuration entries
 build_dir = conf["Paths"]["build"]
 output_dir = conf["Paths"]["output"]

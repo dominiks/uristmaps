@@ -197,7 +197,7 @@ def render_tile(tile_x, tile_y, settings):
 
             # Check if theres a structure to render on it
 
-            # TODO: Read the structures export to place tower/town sprites ontop the biomes
+            # Read the structures export to place tower/town sprites ontop the biomes
             try:
                 struct_name = structures["map"][str(world_x)][str(world_y)]
                 try:
