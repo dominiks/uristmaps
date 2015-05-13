@@ -1,7 +1,6 @@
-syntax:glob
-
 output/
 build/
+uristbuild/
 *.pyc
 .directory
 .doit.db
