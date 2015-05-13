@@ -202,7 +202,7 @@ def load_detailed_maps():
     """ Convert the bmp in the region dir to the output dir as png.
     And add them to the detailed_maps.json
     """
-    id_finder = re.compile("-(\d+)\.bmp$")
+    id_finder = re.compile("-(\d+)\.png$")
 
     # Iterate over all detailed map files, determine the size and site-id
 
