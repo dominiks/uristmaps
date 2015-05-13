@@ -17,6 +17,7 @@ function init_uristmaps() {
     map = L.map('map').setView([0, 0], 3);
     L.tileLayer('/tiles/{z}/{x}/{y}.png', {
         noWrap: true,
+        minZoom: 1,
         maxZoom: {{ max_zoom }},
         attribution: "<a href='http://www.uristmaps.org/'>UristMaps {{ version }}</a>",
     }).addTo(map);
