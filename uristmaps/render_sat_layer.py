@@ -36,26 +36,42 @@ def render_layer(level):
     """
     biomes = load_biomes_map()
     structures = load_structures_map()
-
+    
+    # The rendersettings
+    settings = {"level" : level, # The zoom level to render
+                "biomes" : load_biomes_map(), # The biome information
+                "structures": load_structures_map(), # The structures information
+                "tile_amount" : int(math.pow(2, level)) # How many tiles the renderjob is wide (or high)
+    }
+    
     # Determine wich will be the first zoom level to use graphic tiles
     # bigger than 1px:
     zoom_offset = 0
-    mapsize = 256
+    
+    # One rendered tile has a side length of 256px. The smallest zoom
+    # uses only 1 tile.
+    mapsize = 256 
     while mapsize < biomes["worldsize"]:
         mapsize *= 2
         zoom_offset += 1
 
+    settings["zoom_offset"] = zoom_offset
     # Zoom level 'zoom_offset' will be the first in which the world can
     # be rendered onto the map using 1px sized tiles.
 
-    tile_amount = int(math.pow(2,level))
-
+    # The size of the tileset images to use for rendering.
     graphic_size = int(math.pow(2, level - zoom_offset))
-
-    # Dont render this layer when the world would not even fit if the tiles were 1px big
-    # TODO: Find way to render this: Only draw every <n> world tiles or render big and scale down
+    
+    stepsize = 1
+    # The world would not fit into this layer, even if the used tiles were only 1px big.
     if graphic_size == 0:
+        # We'll render only every second, or fourth etc. world coordinate
+        stepsize = math.pow(2, zoom_offset - level)
         return
+    settings["graphic_size"] = graphic_size
+
+    # Load the tilesheet
+    settings["tiles"] = tilesets.get_tileset(graphic_size)
 
     # Read max number of processes
     process_count = conf.getint("Performance", "processes")
@@ -64,7 +80,7 @@ def render_layer(level):
     # for each process. This would be the ideal chunk size to keep
     # processes from coming back the pool to get more work. That just
     # costs time apparently.
-    chunk = tile_amount ** 2
+    chunk = settings["tile_amount"] ** 2
 
     # Limiting the chunksize helps getting more frequent updates for the progress bar
     # This slows the operation a bit down, though (about 1.5sek for zoom lvl 6...)
@@ -78,8 +94,6 @@ def render_layer(level):
     # Setup multiprocessing pool
     pool = Pool(process_count)
 
-    # Load the tilesheet
-    TILES = tilesets.get_tileset(graphic_size)
 
     # Save the path to the config file in a pid file for this process' children
     with open(".{}.txt".format(os.getpid()), "w") as pidfile:
@@ -87,10 +101,10 @@ def render_layer(level):
 
     # Send the tile render jobs to the pool. Generates the parameters for each tile
     # with the get_tasks function.
-    a = pool.imap_unordered(render_tile_mp, get_tasks(tile_amount, level, zoom_offset, biomes, structures, TILES), chunksize=chunk)
+    a = pool.imap_unordered(render_tile_mp, get_tasks(settings), chunksize=chunk)
 
     counter = 0
-    total = tile_amount**2
+    total = settings["tile_amount"] ** 2
 
     # Show a nice progress bar with integrated ETA estimation
     with progress.Bar(label="Using {}px sized tiles ".format(graphic_size), expected_size=total) as bar:
@@ -106,13 +120,13 @@ def render_layer(level):
         os.remove(".{}.txt".format(os.getpid()))
 
 
-def get_tasks(tileamount, level, zoom_offset, biomes, structures, tiles):
+def get_tasks(settings):
     """ Generate the parameters for render_tile_mp calls for every tile
     that will be rendered. Each set of parameters is a single task for a
     process.
     """
-    for x, y in itertools.product(range(tileamount), repeat=2):
-        yield (x, y, level, zoom_offset, biomes, structures, tiles)
+    for x, y in itertools.product(range(settings["tile_amount"]), repeat=2):
+        yield (x, y, settings)
 
 
 def render_tile_mp(opts):
@@ -127,20 +141,24 @@ def render_tile_mp(opts):
         traceback.print_exc()
 
 
-def render_tile(tile_x, tile_y, level, zoom_offset, biomes, structures, tiles):
+def render_tile(tile_x, tile_y, settings):
     """ Render the world map tile with the given indeces at the provided level.
     """
-    worldsize = biomes["worldsize"] # Convenience shortname
+    worldsize = settings["biomes"]["worldsize"] # Convenience shortname
     image = Image.new("RGBA", (256, 256), "white")
 
     # The size of graphic-tiles that will be used for rendering
-    graphic_size = int(math.pow(2, level - zoom_offset))
+    graphic_size = settings["graphic_size"]
 
     # Calculate the size of the rendered world in tiles
-    render_size = 256 * math.pow(2, level)
+    render_size = 256 * math.pow(2, settings["level"])
+    
+    tiles = settings["tiles"]
+    biomes = settings["biomes"]
+    structures = settings["structures"]
 
     # How many render tiles are kept clear left and top to center the world render
-    clear_tiles = 256 * math.pow(2, zoom_offset) - worldsize
+    clear_tiles = 256 * math.pow(2, settings["zoom_offset"]) - worldsize
     clear_tiles //= 2 # Half it to get the offset left and top of the world.
 
     tiles_per_block = 256 // graphic_size
@@ -182,11 +200,11 @@ def render_tile(tile_x, tile_y, level, zoom_offset, biomes, structures, tiles):
                 # No structure found
                 pass
 
-    target_dir = "{}/tiles/{}/{}/".format(paths["output"], level, tile_x)
+    target_dir = "{}/tiles/{}/{}/".format(paths["output"], settings["level"], tile_x)
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
-    fname = "{}/tiles/{}/{}/{}.png".format(paths["output"], level, tile_x, tile_y)
+    fname = "{}/tiles/{}/{}/{}.png".format(paths["output"], settings["level"], tile_x, tile_y)
     image.save(fname)
 
 
