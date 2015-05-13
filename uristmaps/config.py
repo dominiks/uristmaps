@@ -14,9 +14,6 @@ so we use that to determine the conf path.
 
 We use the parent_pid as the identifier for the file to allow multiple instances of
 uristmaps to be running at the same time.
-
-TODO: Delete the pidfile when done!
-
 """
 
 try:
