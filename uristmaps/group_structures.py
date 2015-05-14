@@ -40,79 +40,84 @@ def make_groups():
     blacklist = ["river", "meadow", "crops", "orchard", "pasture", "road"]
 
     # first step is to grow groups on the map
-    for (x,y) in progress.dots(itertools.product(range(world_size), repeat=2), every=20000):
-        this_type = get_type(structures["map"], x, y)
+    with progress.Bar(label="Pass 1 ", expected_size=world_size, every=100) as bar:
+        for (x,y) in itertools.product(range(world_size), repeat=2):
+            bar.show(x)
+            this_type = get_type(structures["map"], x, y)
 
-        # Skip this tile when there's no structure
-        if this_type == "" or this_type in blacklist:
-            continue
+            # Skip this tile when there's no structure
+            if this_type == "" or this_type in blacklist:
+                continue
 
-        current_grp = get_grp(groups, x, y)            
-        if current_grp == "":
-            current_grp = next_grp_index
-            group_defs[current_grp] = this_type
-            next_grp_index += 1
-            groups[x][y] = current_grp
+            current_grp = get_grp(groups, x, y)            
+            if current_grp == "":
+                current_grp = next_grp_index
+                group_defs[current_grp] = this_type
+                next_grp_index += 1
+                groups[x][y] = current_grp
 
-        allow_x = False
-        if x < world_size:
-            allow_x = True
-            right = get_type(structures["map"], x+1, y)
-            if right == this_type:
-                set_grp(groups, x+1, y, current_grp)
+            allow_x = False
+            if x < world_size:
+                allow_x = True
+                right = get_type(structures["map"], x+1, y)
+                if right == this_type:
+                    set_grp(groups, x+1, y, current_grp)
 
-        allow_y = False
-        if y < world_size:
-            allow_y = True
-            below = get_type(structures["map"], x, y+1)
-            if below == this_type:
-                set_grp(groups, x, y+1, current_grp)
+            allow_y = False
+            if y < world_size:
+                allow_y = True
+                below = get_type(structures["map"], x, y+1)
+                if below == this_type:
+                    set_grp(groups, x, y+1, current_grp)
 
-        if allow_x and allow_y:
-            right_below = get_type(structures["map"], x+1, y+1)
-            if right_below == this_type:
-                set_grp(groups, x+1, y+1, current_grp)
+            if allow_x and allow_y:
+                right_below = get_type(structures["map"], x+1, y+1)
+                if right_below == this_type:
+                    set_grp(groups, x+1, y+1, current_grp)
 
         # for each tile, get the type of the one above and to the right
         # to check if we have a new group here. write the grp index
         # on these cells
+        bar.show(world_size)
 
     # second step is to go over them and merge neighbouring groups
     # of the same type
-    for (x,y) in progress.dots(itertools.product(range(world_size), repeat=2), every=20000):
-        this_grp = get_grp(groups, x, y)
+    with progress.Bar(label="Pass 2 ", expected_size=world_size, every=100) as bar:
+        for (x,y) in itertools.product(range(world_size), repeat=2):
+            bar.show(x)
+            this_grp = get_grp(groups, x, y)
 
-        # skip non-groups
-        if this_grp == "":
-            continue
+            # skip non-groups
+            if this_grp == "":
+                continue
 
-        allow_x = False
-        if x < world_size:
-            allow_x = True
-            right = get_grp(groups, x+1, y)
-            if right != "" and right != this_grp and \
-                group_defs[this_grp] == group_defs[right]:
-                replace_grp(groups, right, this_grp)
-                del(group_defs[right])
+            allow_x = False
+            if x < world_size:
+                allow_x = True
+                right = get_grp(groups, x+1, y)
+                if right != "" and right != this_grp and \
+                    group_defs[this_grp] == group_defs[right]:
+                    replace_grp(groups, right, this_grp)
+                    del(group_defs[right])
 
-        allow_y = False
-        if y < world_size:
-            allow_y = True
-            below = get_grp(groups, x, y+1)
-            if below != "" and below != this_grp and \
-                group_defs[this_grp] == group_defs[below]:
-                replace_grp(groups, below, this_grp)
-                del(group_defs[below])
+            allow_y = False
+            if y < world_size:
+                allow_y = True
+                below = get_grp(groups, x, y+1)
+                if below != "" and below != this_grp and \
+                    group_defs[this_grp] == group_defs[below]:
+                    replace_grp(groups, below, this_grp)
+                    del(group_defs[below])
 
-        if allow_x and allow_y:
-            right_below = get_grp(groups, x+1, y+1)
-            if right_below != "" and right_below != this_grp and \
-                group_defs[this_grp] == group_defs[right_below]:
-                replace_grp(groups, right_below, this_grp)
-                del(group_defs[right_below])
+            if allow_x and allow_y:
+                right_below = get_grp(groups, x+1, y+1)
+                if right_below != "" and right_below != this_grp and \
+                    group_defs[this_grp] == group_defs[right_below]:
+                    replace_grp(groups, right_below, this_grp)
+                    del(group_defs[right_below])
 
-    # Remove empty x-coordinates from the map
-    groups_final ={k:v for k,v in groups.items() if v}
+        # Remove empty x-coordinates from the map
+        groups_final ={k:v for k,v in groups.items() if v}
 
 
     result = {"groups": groups_final, "defs": group_defs}

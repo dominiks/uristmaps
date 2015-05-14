@@ -74,42 +74,48 @@ def load():
     del(hydro_image)
 
     # Iterate over all pixels in both images
-    for (x,y) in progress.dots(itertools.product(range(world_size), repeat=2), every=20000):
-        try:
-            structs[(x,y)] = STRUCTS[struct_pixels[(x,y)]]
-        except KeyError:
-            # We are not interested in this structure
-            structs[(x,y)] = ""
-        # Check if there is a river
-        try:
-            river = RIVERS[hydro_pixels[(x,y)]]
-            if structs[(x,y)] != "" and structs[(x,y)] != "river":
-                #print("Overwriting {} with river.".format(structs[(x,y)]))
+    with progress.Bar(label="Pass 1 ", expected_size=world_size, every=100) as bar:
+        for (x,y) in itertools.product(range(world_size), repeat=2):
+            bar.show(x)
+            try:
+                structs[(x,y)] = STRUCTS[struct_pixels[(x,y)]]
+            except KeyError:
+                # We are not interested in this structure
+                structs[(x,y)] = ""
+            # Check if there is a river
+            try:
+                river = RIVERS[hydro_pixels[(x,y)]]
+                if structs[(x,y)] != "" and structs[(x,y)] != "river":
+                    #print("Overwriting {} with river.".format(structs[(x,y)]))
+                    pass
+                structs[(x,y)] = "river"
+            except KeyError:
                 pass
-            structs[(x,y)] = "river"
-        except KeyError:
-            pass
+        bar.show(world_size)
 
     final_tiles = {}
     # Now pass over all structures and see where tiles of the same type
     # neighbour each other to add the suffixes.
-    for (x,y) in progress.dots(itertools.product(range(world_size), repeat=2), every=20000):
-        suffixes = ""
-        if same_type(structs, (x,y), (0,-1)):
-            suffixes += "n"
-        if same_type(structs, (x,y), (-1,0)):
-            suffixes += "w"
-        if same_type(structs, (x,y), (0,1)):
-            suffixes += "s"
-        if same_type(structs, (x,y), (1,0)):
-            suffixes += "e"
+    with progress.Bar(label="Pass 2 ", expected_size=world_size, every=100) as bar:
+        for (x,y) in itertools.product(range(world_size), repeat=2):
+            bar.show(x)
+            suffixes = ""
+            if same_type(structs, (x,y), (0,-1)):
+                suffixes += "n"
+            if same_type(structs, (x,y), (-1,0)):
+                suffixes += "w"
+            if same_type(structs, (x,y), (0,1)):
+                suffixes += "s"
+            if same_type(structs, (x,y), (1,0)):
+                suffixes += "e"
 
-        if suffixes:
-            tile_type = "{}_{}".format(structs[(x,y)], suffixes)
-            try:
-                final_tiles[x][y] = tile_type
-            except KeyError:
-                final_tiles[x] = {y : tile_type}
+            if suffixes:
+                tile_type = "{}_{}".format(structs[(x,y)], suffixes)
+                try:
+                    final_tiles[x][y] = tile_type
+                except KeyError:
+                    final_tiles[x] = {y : tile_type}
+        bar.show(world_size)
 
     result = {"worldsize": world_size,
               "map": final_tiles}
@@ -117,6 +123,7 @@ def load():
     build_dir = conf["Paths"]["build"]
     if not os.path.exists(build_dir):
         os.makedirs(build_dir)
+
     with open("{}/structs.json".format(build_dir), "w") as heightjson:
         heightjson.write(json.dumps(result))
         logging.debug("Dumped structs into {}/biomes.structs".format(build_dir))
