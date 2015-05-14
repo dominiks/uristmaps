@@ -37,7 +37,7 @@ def make_groups():
     world_size = structures["worldsize"]
 
     # These structures should not be grouped (usually because there is no marker for them)
-    blacklist = ["river", "meadow", "crops", "orchard", "pasture"]
+    blacklist = ["river", "meadow", "crops", "orchard", "pasture", "road"]
 
     # first step is to grow groups on the map
     for (x,y) in progress.dots(itertools.product(range(world_size), repeat=2), every=20000):
