@@ -57,6 +57,7 @@ def render_uristjs():
     tpl_context = {
         "version"  : __version__,
         "max_zoom" : conf.getint("Map", "max_zoom"),
+        "min_zoom" : conf.getint("Map", "min_zoom"),
         "max_cluster_radius" : conf.getint("Map", "max_cluster_radius")
     }
 

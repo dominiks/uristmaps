@@ -164,7 +164,7 @@ def task_render_sat():
        return [pjoin(topdir, str(level), str(x),"{}.png".format(y)) for \
                (x,y) in itertools.product(range(level + 1), repeat=2)]
 
-    for i in range(1,conf.getint("Map","max_zoom") + 1):
+    for i in range(conf.getint("Map", "min_zoom"),conf.getint("Map","max_zoom") + 1):
         yield {
             "name"      : i,
             "verbosity" : 2,
