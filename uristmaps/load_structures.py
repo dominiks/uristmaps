@@ -25,7 +25,11 @@ def same_type(structs, orig, other):
 
 
 def load():
+    """ Iterate over the structures image and analyse the marked structures.
+    Also reads the hydro image for river info.
+    """
 
+    # Structure translation table
     STRUCTS = {
         (128,128,128): "castle",
         (255,255,255): "village",
@@ -50,14 +54,17 @@ def load():
 #
     }
 
+    # Hydro image translation table
     RIVERS = {
         (0,224,255)  : "river",
         (0,255,255)  : "river",
         (0,112,255)  : "river",
     }
 
+    # The identified structures
     structs = {}
 
+    # Open the structs and hydro images, get pixel info
     struct_image = Image.open(filefinder.struct_map())
     struct_pixels = struct_image.load()
     world_size = struct_image.size[0]
@@ -65,6 +72,8 @@ def load():
     hydro_image = Image.open(filefinder.hydro_map())
     hydro_pixels = hydro_image.load()
     del(hydro_image)
+
+    # Iterate over all pixels in both images
     for (x,y) in progress.dots(itertools.product(range(world_size), repeat=2), every=20000):
         try:
             structs[(x,y)] = STRUCTS[struct_pixels[(x,y)]]
@@ -83,7 +92,7 @@ def load():
 
     final_tiles = {}
     # Now pass over all structures and see where tiles of the same type
-    # neighbour each other
+    # neighbour each other to add the suffixes.
     for (x,y) in progress.dots(itertools.product(range(world_size), repeat=2), every=20000):
         suffixes = ""
         if same_type(structs, (x,y), (0,-1)):
