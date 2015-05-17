@@ -76,6 +76,16 @@ def legends_xml(fail=True):
     raise IOError("Could not find legends xml export in {}!".format(region_dir))
     return None
     
+def legends_plus_xml(fail=True):
+    """ Find the legends.xml file.
+    """
+    files = glob.glob(region_dir + "/" + region_name + "*-legends_plus.xml")
+
+    if files:
+        return files[0]
+
+    raise IOError("Could not find legends xml export in {}!".format(region_dir))
+    return None
 
 def load_map(key, fail=True):
     """ Search for a map export in the region dir by its keyand return the
