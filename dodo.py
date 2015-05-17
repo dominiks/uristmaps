@@ -15,7 +15,7 @@ region_dir = conf["Paths"]["region"]
 tiles_dir = conf["Paths"]["tiles"]
 tilesets_dir = conf["Paths"]["tilesets"]
 
-DOIT_CONFIG = {"default_tasks": ["create_tilesets", "load_populations", "dist_sites", "render_sat", "index", "js_file", "biome_legend", "copy_res"]}
+DOIT_CONFIG = {"default_tasks": ["create_tilesets", "load_populations", "dist_sites", "render_sat", "render_regions", "index", "js_file", "biome_legend", "copy_res"]}
 
 def list_tile_files(topdir, level):
     """ Generate a complete list of the files that make up
