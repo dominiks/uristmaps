@@ -21,7 +21,17 @@ function init_uristmaps() {
         maxZoom: {{ max_zoom }},
         attribution: "<a href='http://www.uristmaps.org/'>UristMaps {{ version }}</a>",
     }).addTo(map);
+    
+    window.regions = L.tileLayer('/regions/{z}/{x}/{y}.png', {
+        noWrap: true,
+        minZoom: {{ min_zoom }},
+        maxZoom: {{ max_zoom }},
+        attribution: "<a href='http://www.uristmaps.org/'>UristMaps {{ version }}</a>",
+    });
+    
     window.map = map;
+    
+    
 
     // Load the sites json containing short info for every site
     jQuery.getJSON("/js/sitesgeo.json", process_loaded_sites);
@@ -124,8 +134,10 @@ function process_loaded_sites(data) {
     map.addLayer(clusters);
     
     // Add 
-    var icon_layer = {"Sites": clusters};
-    L.control.layers({}, icon_layer).addTo(map);
+    var base_layers = {};
+    var icon_layers = {"Regions" : window.regions,
+                       "Sites": clusters};
+    L.control.layers(base_layers, icon_layers).addTo(map);
 };
 
 $(function() {

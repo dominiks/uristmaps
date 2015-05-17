@@ -4,7 +4,7 @@ from os.path import join as pjoin
 
 from doit.tools import LongRunning
 
-from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder, tilesets, load_structures, templates, uristcopy, group_structures, load_pops, imgconvert, load_regions
+from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder, tilesets, load_structures, templates, uristcopy, group_structures, load_pops, imgconvert, load_regions, render_region_layer
 from uristmaps.config import conf
 
 
@@ -16,6 +16,13 @@ tiles_dir = conf["Paths"]["tiles"]
 tilesets_dir = conf["Paths"]["tilesets"]
 
 DOIT_CONFIG = {"default_tasks": ["create_tilesets", "load_populations", "dist_sites", "render_sat", "index", "js_file", "biome_legend", "copy_res"]}
+
+def list_tile_files(topdir, level):
+    """ Generate a complete list of the files that make up
+    the layer with the given zoom level in the topdir.
+    """
+    return [pjoin(topdir, str(level), str(x),"{}.png".format(y)) for \
+	    (x,y) in itertools.product(range(level + 1), repeat=2)]
 
 def task_read_biome_info():
     """ Read biome info and write the biomes.json.
@@ -66,7 +73,7 @@ def task_render_regions():
         yield {
             "name"      : i,
             "verbosity" : 2,
-            "actions"   : [(render_region_layer.render_region, (i,))],
+            "actions"   : [(render_region_layer.render_layer, (i,))],
 
             "file_dep"  : [pjoin(build_dir, "regions.json")],
             "targets"   : list_tile_files(pjoin(output_dir, "regions"),i),
@@ -184,13 +191,6 @@ def task_place_site_markers():
 def task_render_sat():
     """ Render the map layers for the 'satellite'-like view of the world.
     """
-
-    def list_tile_files(topdir, level):
-       """ Generate a complete list of the files that make up
-       the layer with the given zoom level in the topdir.
-       """
-       return [pjoin(topdir, str(level), str(x),"{}.png".format(y)) for \
-               (x,y) in itertools.product(range(level + 1), repeat=2)]
 
     for i in range(conf.getint("Map", "min_zoom"),conf.getint("Map","max_zoom") + 1):
         yield {
