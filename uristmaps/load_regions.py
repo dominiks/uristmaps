@@ -98,7 +98,14 @@ def load_regions():
                 if line.startswith("<id>"):
                     region_id = line[start:end]
                 elif line.startswith("<coords>"):
-                    region_map[region_id]["coords"] = line[start:end]
+                    # Magic!
+                    # 1. Split the string by |
+                    # 2. Iterate over that, but ignore the last [:-1] element, as its empty (the line ends with a |
+                    # 3. Iterate over these split items, split them by ,
+                    # 4. Map int function on this pair of values to convert from str
+                    # 5. list() on that result, as it is an iterator and will crash this construct.
+                    coords = [list(map(int, item.split(","))) for item in line[start:end].split("|")[:-1]]
+                    region_map[region_id]["coords"] = coords
             except Exception as e:
                 print(e)
                 print("Line: '{}'".format(line))
@@ -106,7 +113,11 @@ def load_regions():
 
 
     with open(os.path.join(build_dir, "regions.json"), "w") as regionsjson:
-        regionsjson.write(json.dumps(region_map))
+        try:
+            regionsjson.write(json.dumps(region_map))
+        except Exception as e:
+                print(region_map)
+                print(e)
 
 
 def add_to_regions(regions, line):
