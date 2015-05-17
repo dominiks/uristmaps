@@ -4,9 +4,7 @@ from os.path import join as pjoin
 
 from doit.tools import LongRunning
 
-from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder, tilesets, \
-                      load_structures, templates, uristcopy, group_structures, \
-                      load_pops, imgconvert
+from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder, tilesets, load_structures, templates, uristcopy, group_structures, load_pops, imgconvert, load_regions
 from uristmaps.config import conf
 
 
@@ -42,6 +40,21 @@ def task_load_sites():
         "file_dep"  : [filefinder.legends_xml(fail=False),
                        pjoin(build_dir, "biomes.json")],
         "clean"     : True,
+        }
+
+
+def task_load_regions():
+    """ Read the legends and legends-plus xml files for region information,
+    write a regions.json for further processing.
+    """
+
+    return {
+        "actions"   : [load_regions.load_regions],
+        "verbosity" : 2,
+        "targets"   : [pjoin(build_dir, "regions.json")],
+        "file_dep"  : [filefinder.legends_xml(fail=False),
+                      filefinder.legends_plus_xml(fail=False)],
+        "clean"     : True
         }
 
 
