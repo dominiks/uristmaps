@@ -55,6 +55,21 @@ def task_load_regions():
         "file_dep"  : [filefinder.legends_xml(fail=False),
                       filefinder.legends_plus_xml(fail=False)],
         "clean"     : True
+    }
+
+
+def task_render_regions():
+    """ Render the region layer containing the region names and colors.
+    """
+
+    for i in range(conf.getint("Map", "min_zoom"),conf.getint("Map","max_zoom") + 1):
+        yield {
+            "name"      : i,
+            "verbosity" : 2,
+            "actions"   : [(render_region_layer.render_region, (i,))],
+
+            "file_dep"  : [pjoin(build_dir, "regions.json")],
+            "targets"   : list_tile_files(pjoin(output_dir, "regions"),i),
         }
 
 
