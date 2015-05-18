@@ -17,14 +17,21 @@ from uristmaps.config import conf
 paths = conf["Paths"] # Reference to that conf section to make the lines a bit shorter. Unlinke this one which still gets really long.
 
 
+def regions_by_coordinate = get_region_by_coord():
+    """ Load the region data and create a map by coordinates.
+    """
+    with open("{}/regions.json".format(paths["build"]),"r") as regionjson:
+        regions = json.loads(regionjson.read())
+        
+    regions
+
+    return biomes
+
 def render_layer(level):
     """ Render all image tiles for the specified level.
     """
+    regions_by_coordinate = get_region_by_coord()
     
-    return
-    biomes = load_biomes_map()
-    structures = load_structures_map()
-
     # The rendersettings
     settings = {"level" : level, # The zoom level to render
                 "biomes" : load_biomes_map(), # The biome information
