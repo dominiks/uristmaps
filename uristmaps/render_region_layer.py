@@ -37,7 +37,7 @@ def get_regions_by_coordinate():
     for region_id in regions_by_id:
         coords = regions_by_id[region_id]["coords"]
         for xy_pair in coords:
-            result[(xy_pair[0],xy_pair[1])] = region_id
+            result[(xy_pair[0],xy_pair[1])] = int(region_id)
  
     return result
 
@@ -166,7 +166,7 @@ def render_tile(tile_x, tile_y, settings):
     clear_tiles //= 2 # Half it to get the offset left and top of the world.
 
     tiles_per_block = 256 // graphic_size
-
+    
     for render_tile_x in range(tiles_per_block):
         # The global x coordinate of this rendered graphics tile in the render output
         global_tile_x = render_tile_x + tile_x * tiles_per_block
@@ -195,11 +195,15 @@ def render_tile(tile_x, tile_y, settings):
             # The top left of the tile that is to be drawn
             location = (render_tile_x * graphic_size, render_tile_y * graphic_size)
 
-            # Render biome
-            draw.rectangle([location[0], location[1], location[0] + graphic_size, location[1] + graphic_size], fill=(255,100,10,128))
+            # Get region at coordinate
+            region_coord = (world_x // 16, world_y // 16)
+            region_id = settings["regions"][region_coord]
             
+                # Render region overlay color
+            draw.rectangle([location[0], location[1], location[0] + graphic_size, location[1] + graphic_size],
+                           fill=(region_id % 255,255 - region_id % 255,10,128))
 
-
+    
     target_dir = "{}/regions/{}/{}/".format(paths["output"], settings["level"], tile_x)
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
