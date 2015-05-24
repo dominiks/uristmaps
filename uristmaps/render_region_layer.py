@@ -6,7 +6,7 @@ from multiprocessing import Pool
 
 from clint.textui import progress
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from doit import get_var
 
@@ -16,26 +16,40 @@ from uristmaps.config import conf
 
 paths = conf["Paths"] # Reference to that conf section to make the lines a bit shorter. Unlinke this one which still gets really long.
 
-
-def regions_by_coordinate = get_region_by_coord():
-    """ Load the region data and create a map by coordinates.
+def load_biomes_map():
+    """ Load heightmap json.
     """
-    with open("{}/regions.json".format(paths["build"]),"r") as regionjson:
-        regions = json.loads(regionjson.read())
-        
-    regions
+    with open("{}/biomes.json".format(paths["build"]),"r") as biomejson:
+        biomes = json.loads(biomejson.read())
 
     return biomes
+
+
+def get_regions_by_coordinate():
+    """ Load the region data and create a map by coordinates.
+    Return a dict {(x,y) -> region_id}
+    """
+    with open("{}/regions.json".format(paths["build"]),"r") as regionjson:
+        regions_by_id = json.loads(regionjson.read())
+        
+    result = {}
+        
+    for region_id in regions_by_id:
+        coords = regions_by_id[region_id]["coords"]
+        for xy_pair in coords:
+            result[(xy_pair[0],xy_pair[1])] = region_id
+ 
+    return result
 
 def render_layer(level):
     """ Render all image tiles for the specified level.
     """
-    regions_by_coordinate = get_region_by_coord()
+    regions_by_coordinate = get_regions_by_coordinate()
     
     # The rendersettings
     settings = {"level" : level, # The zoom level to render
-                "biomes" : load_biomes_map(), # The biome information
-                "structures": load_structures_map(), # The structures information
+                "regions" : regions_by_coordinate, # The biome information
+                "world_size": load_biomes_map()["worldsize"],
                 "tile_amount" : int(math.pow(2, level)) # How many tiles the renderjob is wide (or high)
     }
 
@@ -46,7 +60,7 @@ def render_layer(level):
     # One rendered tile has a side length of 256px. The smallest zoom
     # uses only 1 tile.
     mapsize = 256 
-    while mapsize < biomes["worldsize"]:
+    while mapsize < settings["world_size"]:
         mapsize *= 2
         zoom_offset += 1
 
@@ -64,9 +78,6 @@ def render_layer(level):
         settings["stepsize"] = int(math.pow(2, zoom_offset - level))
         graphic_size = 1
     settings["graphic_size"] = graphic_size
-
-    # Load the tilesheet
-    settings["tiles"] = tilesets.get_tileset(graphic_size)
 
     # Read max number of processes
     process_count = conf.getint("Performance", "processes")
@@ -139,8 +150,9 @@ def render_tile_mp(opts):
 def render_tile(tile_x, tile_y, settings):
     """ Render the world map tile with the given indeces at the provided level.
     """
-    worldsize = settings["biomes"]["worldsize"] / settings["stepsize"] # Convenience shortname
+    worldsize = settings["world_size"] / settings["stepsize"] # Convenience shortname
     image = Image.new("RGBA", (256, 256), "white")
+    draw = ImageDraw.Draw(image, "RGBA")
 
     # The size of graphic-tiles that will be used for rendering
     graphic_size = settings["graphic_size"]
@@ -148,12 +160,8 @@ def render_tile(tile_x, tile_y, settings):
     # Calculate the size of the rendered world in tiles
     render_size = 256 * math.pow(2, settings["level"])
 
-    tiles = settings["tiles"]
-    biomes = settings["biomes"]
-    structures = settings["structures"]
-
     # How many render tiles are kept clear left and top to center the world render
-    clear_tiles = 256 * math.pow(2, settings["zoom_offset"]) - settings["biomes"]["worldsize"]
+    clear_tiles = 256 * math.pow(2, settings["zoom_offset"]) - settings["world_size"]
     clear_tiles //= settings["stepsize"]
     clear_tiles //= 2 # Half it to get the offset left and top of the world.
 
@@ -167,7 +175,7 @@ def render_tile(tile_x, tile_y, settings):
         if global_tile_x < clear_tiles:
             continue
         # And stop this whole row if nothing comes after
-        if global_tile_x >= biomes["worldsize"] / settings["stepsize"] + clear_tiles:
+        if global_tile_x >= settings["world_size"] / settings["stepsize"] + clear_tiles:
             break
 
         for render_tile_y in range(tiles_per_block):
@@ -178,36 +186,23 @@ def render_tile(tile_x, tile_y, settings):
             if global_tile_y < clear_tiles:
                 continue
             # Stop this column if nothing will be visible
-            if global_tile_y >= biomes["worldsize"] / settings["stepsize"] + clear_tiles:
+            if global_tile_y >= settings["world_size"] / settings["stepsize"] + clear_tiles:
                 break
 
             world_x = int(global_tile_x - clear_tiles) * settings["stepsize"]
             world_y = int(global_tile_y - clear_tiles) * settings["stepsize"]
 
+            # The top left of the tile that is to be drawn
             location = (render_tile_x * graphic_size, render_tile_y * graphic_size)
 
             # Render biome
-            img = tiles[biomes["map"][world_y][world_x]]
-            image.paste(img, location)
+            draw.rectangle([location[0], location[1], location[0] + graphic_size, location[1] + graphic_size], fill=(255,100,10,128))
+            
 
-            # Check if theres a structure to render on it
 
-            # Read the structures export to place tower/town sprites ontop the biomes
-            try:
-                struct_name = structures["map"][str(world_x)][str(world_y)]
-                try:
-                    struct = tiles[struct_name]
-                    image.paste(struct, location, struct)
-                except:
-                    #print("Could not render image: {}".format(struct_name))
-                    pass
-            except:
-                # No structure found
-                pass
-
-    target_dir = "{}/tiles/{}/{}/".format(paths["output"], settings["level"], tile_x)
+    target_dir = "{}/regions/{}/{}/".format(paths["output"], settings["level"], tile_x)
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
-    fname = "{}/tiles/{}/{}/{}.png".format(paths["output"], settings["level"], tile_x, tile_y)
+    fname = "{}/regions/{}/{}/{}.png".format(paths["output"], settings["level"], tile_x, tile_y)
     image.save(fname)
