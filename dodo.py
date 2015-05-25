@@ -181,6 +181,7 @@ def task_place_region_markers():
         "actions"   : [region_markers.create_geojson],
         "verbosity" : 2,
         "file_dep"  : [pjoin(build_dir, "regions.json")],
+        "targets"   : [pjoin(build_dir, "regionsgeo.json")],
         "clean"     : True,
     }
 
@@ -217,19 +218,30 @@ def task_render_sat():
         }
 
 
+def task_dist_regions():
+    """ Copy the regeions geojson into the output directory.
+    """
+    return {
+        "actions"  : [(uristcopy.copy, (pjoin(build_dir, "regionsgeo.json"),
+                                       pjoin(output_dir, "js", "regionsgeo.json"))
+                      )],
+        "file_dep" : [pjoin(build_dir, "regionsgeo.json")],
+        "targets"  : [pjoin(output_dir, "js", "regionsgeo.json")]
+    }
+
 def task_dist_sites():
     """ Copy the legends json into the output directory.
     """
 
     return {
         "actions"  : [(uristcopy.copy, (pjoin(build_dir, "sites.json"),
-                              pjoin(output_dir, "js", "sites.json"))
-                     ),
+                                        pjoin(output_dir, "js", "sites.json"))
+                       ),
                       (uristcopy.copy, (pjoin(build_dir, "sitesgeo.json"),
-                              pjoin(output_dir, "js", "sitesgeo.json"))
-                     )],
-        "file_dep" : [pjoin(build_dir, "sites.json"),pjoin(build_dir, "sitesgeo.json")],
-        "targets"  : [pjoin(output_dir, "js", "sites.json"),pjoin(output_dir, "js", "sitesgeo.json")],
+                                        pjoin(output_dir, "js", "sitesgeo.json"))
+                       )],
+        "file_dep" : [pjoin(build_dir, "sites.json"), pjoin(build_dir, "sitesgeo.json")],
+        "targets"  : [pjoin(output_dir, "js", "sites.json"), pjoin(output_dir, "js", "sitesgeo.json")],
     }
 
 

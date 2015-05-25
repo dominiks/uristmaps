@@ -42,8 +42,8 @@ def load():
         (20,20,20)   : "tunnel", 
         (224,224,224): "stone_bridge",  
         (180,167,20) : "other_bridge",
-        (192,192,192): "road", #stone_road
-        (150,127,20) : "road", #other_road
+        (192,192,192): "road",  # stone_road
+        (150,127,20) : "road",  # other_road
         (96,96,96)   : "stone_wall",
         (160,127,20) : "other_wall", 
         (0,96,255)   : "lake",
@@ -84,9 +84,7 @@ def load():
                 structs[(x,y)] = ""
             # Check if there is a river
             try:
-                river = RIVERS[hydro_pixels[(x,y)]]
                 if structs[(x,y)] != "" and structs[(x,y)] != "river":
-                    #print("Overwriting {} with river.".format(structs[(x,y)]))
                     pass
                 structs[(x,y)] = "river"
             except KeyError:

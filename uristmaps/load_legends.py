@@ -90,7 +90,7 @@ def add_to_sites(sites, line):
     if line == "</sites>":
         return False
 
-    #<structures> are not yet handled
+    # <structures> are not yet handled
     if "structures" in line:
         return True
 

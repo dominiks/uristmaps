@@ -35,6 +35,7 @@ function init_uristmaps() {
 
     // Load the sites json containing short info for every site
     jQuery.getJSON("/js/sitesgeo.json", process_loaded_sites);
+    jQuery.getJSON("/js/regionsgeo.json", process_loaded_regions);
     
     setup_sidebars();
     init_buttons();
@@ -131,13 +132,45 @@ function process_loaded_sites(data) {
     $.each(data.features, function(fid, feature) {
         points.addData(feature);
     });
-    map.addLayer(clusters);
+    window.map.addLayer(clusters);
     
     // Add 
     var base_layers = {};
     var icon_layers = {"Regions" : window.regions,
                        "Sites": clusters};
-    L.control.layers(base_layers, icon_layers).addTo(map);
+    L.control.layers(base_layers, icon_layers).addTo(window.map);
+};
+
+function process_loaded_regions(data) {
+    sites_geojson = data;
+    window.regions_geojson = data;
+
+    // Create a cluster group to better show the site icons
+    var clusters = new L.MarkerClusterGroup({
+        maxClusterRadius: {{ max_cluster_radius }}
+    });
+
+    // Convert geojson info to clustered markers
+    var points = L.geoJson(null, {
+        pointToLayer: function (feature, latlng) {
+            var marker = L.marker(latlng, {icon: get_icon(feature.properties.img)});
+            if (feature.properties && feature.properties.popupContent) {
+                marker.bindPopup(feature.properties.popupContent);
+            }
+            clusters.addLayer(marker);
+            return clusters;
+        }
+    });
+    $.each(data.features, function(fid, feature) {
+        points.addData(feature);
+    });
+    window.map.addLayer(clusters);
+
+    // Add
+    var base_layers = {};
+    var icon_layers = {"Regions" : window.regions,
+                       "Sites": clusters};
+    L.control.layers(base_layers, icon_layers).addTo(window.map);
 };
 
 $(function() {

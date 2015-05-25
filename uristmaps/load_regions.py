@@ -112,7 +112,6 @@ def load_regions():
                 print("Line: '{}'".format(line))
                 break
 
-
     with open(os.path.join(build_dir, "regions.json"), "w") as regionsjson:
         try:
             regionsjson.write(json.dumps(region_map))
@@ -178,62 +177,6 @@ def xy2lonlat(xtile, ytile):
     return (lon_deg, lat_deg)
 
 
-def create_geojson():
-    """ Create the sitesgeo.json that the leaflet markers are created
-    from.
-    """
-    from jinja2 import Environment, FileSystemLoader
-    env = Environment(loader=FileSystemLoader("templates"))
-    tooltip_template = env.get_template("_site_tooltip.html")
-
-    with open(os.path.join(build_dir, "sites.json")) as sitesjs:
-        sites = json.loads(sitesjs.read())
-
-    # Read the detailed maps dimensions
-    with open(os.path.join(build_dir, "detailed_maps.json")) as sitesjs:
-        detailed_maps = json.loads(sitesjs.read())
-
-    features = []
-    for site in sites:
-        feature = {"type":"Feature",
-                   "properties": {
-                       "name": site["name"],
-                       "type": site["type"],
-                       "id": site["id"],
-                       "img": "/icons/{}.png".format(site["type"].replace(" ", "_")),
-                       "popupContent": tooltip_template.render({"site":site, "detailed_maps": detailed_maps}),
-                   },
-                   "geometry": {
-                       "type": "Point",
-                       "coordinates": xy2lonlat(*site["coords"])
-                   }
-        }
-
-        # Add the bounding rect for the detailed map to the geojson info.
-        if site["id"] in detailed_maps:
-            # The detailed maps use 48px big blocks
-            width  = detailed_maps[site["id"]]["px_width"]  // 48
-            height = detailed_maps[site["id"]]["px_height"] // 48
-
-            # These coords are not really geojson as they are used directly by leaflet
-            # and leaflet uses the coordinates switched around (y,x)
-            # oh and the bouning rect is defined by the bottom-left and upper-right
-            # corner. Hurray...
-            southwest = [site["coords"][0] - width // 2, site["coords"][1] - height // 2]
-            northeast = [site["coords"][0] + width // 2, site["coords"][1] + height // 2]
-
-            sw_lat_lon = xy2lonlat(*southwest)
-            ne_lat_lon = xy2lonlat(*northeast)
-            feature["properties"]["map_bounds"] = [[sw_lat_lon[1], sw_lat_lon[0]],
-                                                   [ne_lat_lon[1], ne_lat_lon[0]]]
-
-        features.append(feature)
-
-    with open(os.path.join(build_dir, "sitesgeo.json"), "w") as sitesjson:
-        sitesjson.write(json.dumps({"type": "FeatureCollection",
-                                    "features": features}))
-
-
 def load_detailed_maps():
     """ Convert the bmp in the region dir to the output dir as png.
     And add them to the detailed_maps.json
@@ -270,5 +213,3 @@ def load_detailed_maps():
     # Dump maps dict into json
     with open(os.path.join(build_dir, "detailed_maps.json"), "w") as jsonfile:
         jsonfile.write(json.dumps(maps))
-
-
