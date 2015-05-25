@@ -42,6 +42,9 @@ max_cluster_radius = 30
 # Hide spoilery content
 show_spoilers = no
 
+# The font used to render the region names
+map_font = fonts/KaushanScript-Regular.otf
+
 [Output]
 # Use this to inject html into the resulting index.html. For example for
 # user tracking.
