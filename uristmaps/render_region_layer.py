@@ -6,12 +6,15 @@ from multiprocessing import Pool
 
 from clint.textui import progress
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 
 from doit import get_var
 
 from . import tilesets
 from uristmaps.config import conf
+
+
+df_tilesize = 16 # A world tile is 16 units big
 
 
 paths = conf["Paths"] # Reference to that conf section to make the lines a bit shorter. Unlinke this one which still gets really long.
@@ -52,7 +55,6 @@ def render_layer(level):
                 "regions" : regions_by_coordinate, # The biome information
                 "regions_by_id": regions_by_id,
                 "world_size": load_biomes_map()["worldsize"],
-                "font": "fonts/KaushanScript-Regular.otf",
                 "tile_amount" : int(math.pow(2, level)) # How many tiles the renderjob is wide (or high)
     }
 
@@ -156,7 +158,6 @@ def render_tile(tile_x, tile_y, settings):
     worldsize = settings["world_size"] / settings["stepsize"] # Convenience shortname
     image = Image.new("RGBA", (256, 256), "white")
     draw = ImageDraw.Draw(image, "RGBA")
-    font = ImageFont.truetype(settings["font"], 16)
 
     # The size of graphic-tiles that will be used for rendering
     graphic_size = settings["graphic_size"]
@@ -200,16 +201,12 @@ def render_tile(tile_x, tile_y, settings):
             location = (render_tile_x * graphic_size, render_tile_y * graphic_size)
 
             # Get region at coordinate
-            region_coord = (world_x // 16, world_y // 16)
+            region_coord = (world_x // df_tilesize, world_y // df_tilesize)
             region_id = settings["regions"][region_coord]
             
                 # Render region overlay color
             draw.rectangle([location[0], location[1], location[0] + graphic_size, location[1] + graphic_size],
                            fill=(region_id % 255,255 - region_id % 255,10,128))
-            draw.text(location,
-                      str(settings["regions_by_id"][str(region_id)]["size"]),
-                      fill=(0,0,0,255),
-                      font=font)
 
     
     target_dir = "{}/regions/{}/{}/".format(paths["output"], settings["level"], tile_x)
