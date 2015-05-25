@@ -106,6 +106,7 @@ def load_regions():
                     # 5. list() on that result, as it is an iterator and will crash this construct.
                     coords = [list(map(int, item.split(","))) for item in line[start:end].split("|")[:-1]]
                     region_map[region_id]["coords"] = coords
+                    region_map[region_id]["size"] = len(coords)
             except Exception as e:
                 print(e)
                 print("Line: '{}'".format(line))

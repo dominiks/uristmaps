@@ -6,7 +6,7 @@ from multiprocessing import Pool
 
 from clint.textui import progress
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 from doit import get_var
 
@@ -25,13 +25,10 @@ def load_biomes_map():
     return biomes
 
 
-def get_regions_by_coordinate():
+def get_regions_by_coordinate(regions_by_id):
     """ Load the region data and create a map by coordinates.
     Return a dict {(x,y) -> region_id}
     """
-    with open("{}/regions.json".format(paths["build"]),"r") as regionjson:
-        regions_by_id = json.loads(regionjson.read())
-        
     result = {}
         
     for region_id in regions_by_id:
@@ -44,12 +41,18 @@ def get_regions_by_coordinate():
 def render_layer(level):
     """ Render all image tiles for the specified level.
     """
-    regions_by_coordinate = get_regions_by_coordinate()
+    
+    with open("{}/regions.json".format(paths["build"]),"r") as regionjson:
+        regions_by_id = json.loads(regionjson.read())
+    
+    regions_by_coordinate = get_regions_by_coordinate(regions_by_id)
     
     # The rendersettings
     settings = {"level" : level, # The zoom level to render
                 "regions" : regions_by_coordinate, # The biome information
+                "regions_by_id": regions_by_id,
                 "world_size": load_biomes_map()["worldsize"],
+                "font": "fonts/KaushanScript-Regular.otf",
                 "tile_amount" : int(math.pow(2, level)) # How many tiles the renderjob is wide (or high)
     }
 
@@ -153,6 +156,7 @@ def render_tile(tile_x, tile_y, settings):
     worldsize = settings["world_size"] / settings["stepsize"] # Convenience shortname
     image = Image.new("RGBA", (256, 256), "white")
     draw = ImageDraw.Draw(image, "RGBA")
+    font = ImageFont.truetype(settings["font"], 16)
 
     # The size of graphic-tiles that will be used for rendering
     graphic_size = settings["graphic_size"]
@@ -202,6 +206,10 @@ def render_tile(tile_x, tile_y, settings):
                 # Render region overlay color
             draw.rectangle([location[0], location[1], location[0] + graphic_size, location[1] + graphic_size],
                            fill=(region_id % 255,255 - region_id % 255,10,128))
+            draw.text(location,
+                      str(settings["regions_by_id"][str(region_id)]["size"]),
+                      fill=(0,0,0,255),
+                      font=font)
 
     
     target_dir = "{}/regions/{}/{}/".format(paths["output"], settings["level"], tile_x)
