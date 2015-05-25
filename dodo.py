@@ -4,7 +4,7 @@ from os.path import join as pjoin
 
 from doit.tools import LongRunning
 
-from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder, tilesets, load_structures, templates, uristcopy, group_structures, load_pops, imgconvert, load_regions, render_region_layer
+from uristmaps import render_sat_layer, load_legends, load_biomes, filefinder, tilesets, load_structures, templates, uristcopy, group_structures, load_pops, imgconvert, load_regions, render_region_layer, region_markers
 from uristmaps.config import conf
 
 
@@ -171,6 +171,17 @@ def task_center_sites():
        "file_dep"   : [pjoin(build_dir, "group_centers.json"),
                        pjoin(build_dir, "sites.json")],
        "clean"     : True,
+    }
+
+
+def task_place_region_markers():
+    """ Create the region names on the map.
+    """
+    return {
+        "actions"   : [region_markers.create_geojson],
+        "verbosity" : 2,
+        "file_dep"  : [pjoin(build_dir, "regions.json")],
+        "clean"     : True,
     }
 
 
