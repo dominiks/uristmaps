@@ -1,3 +1,9 @@
+Deprecated
+==========
+
+This project is deprecated. [Uristmaps now uses a rewrite in Java](https://github.com/dominiks/uristmapsj).
+
+
 Urist Maps
 ==========
 
